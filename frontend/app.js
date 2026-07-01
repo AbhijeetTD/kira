@@ -142,7 +142,11 @@ async function checkHealth() {
     const d = await r.json();
     const ok = d.llm === 'reachable';
     elHealthDot.className = `health-dot ${ok ? 'ok' : 'error'}`;
-    elHealthLabel.textContent = ok ? `GPT-5.4 ✓  |  ${d.active_incidents} active` : 'LLM unreachable';
+    const model = d.model || 'Ollama';
+    const ctx   = d.cluster_context ? ` · ${d.cluster_context}` : '';
+    elHealthLabel.textContent = ok
+      ? `${model} ✓  |  ${d.active_incidents} active${ctx}`
+      : 'LLM unreachable';
   } catch {
     elHealthDot.className = 'health-dot error';
     elHealthLabel.textContent = 'Backend unreachable';
@@ -654,7 +658,7 @@ function renderDecisionRunning() {
   upsertCard('card-decision', 'flow-card flow-decision running', `
     <div class="flow-card-header">
       <span class="flow-icon">🧠</span>
-      <span class="flow-title">GPT Decision Engine</span>
+      <span class="flow-title">LLM Decision Engine</span>
       <span class="flow-count">Analysing…</span>
     </div>
     <div class="flow-card-body">
@@ -697,7 +701,7 @@ function renderDecisionCard(data) {
   const card = upsertCard('card-decision', 'flow-card flow-decision', `
     <div class="flow-card-header">
       <span class="flow-icon">🧠</span>
-      <span class="flow-title">GPT Decision Engine</span>
+      <span class="flow-title">LLM Decision Engine</span>
       <span class="flow-conf" style="color:${confColor}" data-target="${conf}">0%</span>
     </div>
     <div class="flow-card-body">

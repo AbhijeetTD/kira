@@ -110,10 +110,20 @@ _emit_queues: Dict[str, _EmitQueue] = {}
 
 @app.get("/health")
 async def health_check():
+    import subprocess
     llm_ok = await llm_health()
+    # Resolve current cluster context
+    try:
+        ctx = subprocess.check_output(
+            ["kubectl", "config", "current-context"], text=True
+        ).strip()
+    except Exception:
+        ctx = "unknown"
     return {
         "status": "ok",
         "llm": "reachable" if llm_ok else "unreachable",
+        "model": settings.ollama_model,
+        "cluster_context": ctx,
         "active_incidents": len(
             [i for i in incidents.values() if i.status not in (
                 IncidentStatus.RESOLVED, IncidentStatus.FAILED
@@ -143,19 +153,46 @@ async def list_outcomes():
 
 # ── Infrastructure scan ─────────────────────────────────────────────────────
 
-SCAN_NAMESPACES = ["ls-pricing-cloudops-test", "ls-data-cloudops-test"]
+# System namespaces to always exclude from scans
+_SYSTEM_NAMESPACES = {
+    "kube-system", "kube-public", "kube-node-lease",
+    "local-path-storage", "cert-manager", "ingress-nginx",
+    "monitoring", "observability", "cattle-system",
+}
+
+
+async def _discover_namespaces() -> list[str]:
+    """Return all non-system namespaces from the live cluster.
+    Falls back to DEFAULT_NAMESPACE from settings if discovery fails."""
+    loop = asyncio.get_event_loop()
+    try:
+        k8s._load_kube_config()
+        core_v1 = k8s.client.CoreV1Api()
+        ns_list = await loop.run_in_executor(None, core_v1.list_namespace)
+        namespaces = [
+            ns.metadata.name
+            for ns in ns_list.items
+            if ns.metadata.name not in _SYSTEM_NAMESPACES
+        ]
+        return namespaces or [settings.default_namespace]
+    except Exception as exc:
+        logger.warning("Namespace discovery failed, using default: %s", exc)
+        return [settings.default_namespace]
 
 
 @app.post("/scan", status_code=200)
 async def scan_infrastructure(background_tasks: BackgroundTasks):
-    """Scan all workloads across target namespaces. Creates incidents for
-    any unhealthy deployments/statefulsets found. Returns a summary."""
+    """Scan all workloads across all non-system namespaces discovered from
+    the live cluster. Creates incidents for unhealthy workloads."""
     loop = asyncio.get_event_loop()
     healthy = []
     unhealthy = []
     created_incidents = []
 
-    for ns in SCAN_NAMESPACES:
+    scan_namespaces = await _discover_namespaces()
+    logger.info("Scanning namespaces: %s", scan_namespaces)
+
+    for ns in scan_namespaces:
         try:
             # List all deployments in the namespace
             k8s._load_kube_config()
@@ -227,14 +264,14 @@ async def scan_infrastructure(background_tasks: BackgroundTasks):
         background_tasks.add_task(run_agent, incident.id)
         created_incidents.append({"id": incident.id, "service": wl["name"], "namespace": wl["namespace"]})
 
-    # If everything is healthy, create a resolved summary — no GPT calls needed
+    # If everything is healthy, create a resolved summary — no LLM calls needed
     if not unhealthy and not created_incidents:
         summary_payload = AlertPayload(
             service="infrastructure",
-            namespace=SCAN_NAMESPACES[0],
+            namespace=scan_namespaces[0],
             message=(
                 f"Infrastructure scan: all {len(healthy)} workloads healthy across "
-                f"{', '.join(SCAN_NAMESPACES)}"
+                f"{', '.join(scan_namespaces)}"
             ),
             severity="info",
             source="infra-scan",
@@ -267,15 +304,15 @@ async def scan_infrastructure(background_tasks: BackgroundTasks):
             status="success",
             detail=(
                 f"Scanned {len(healthy)} workloads across "
-                f"{', '.join(SCAN_NAMESPACES)} — all healthy.\n\n"
+                f"{', '.join(scan_namespaces)} — all healthy.\n\n"
                 f"{workload_detail}"
             ),
         ))
         created_incidents.append({"id": incident.id, "service": "infrastructure",
-                                  "namespace": SCAN_NAMESPACES[0]})
+                                  "namespace": scan_namespaces[0]})
 
     return {
-        "scanned_namespaces": SCAN_NAMESPACES,
+        "scanned_namespaces": scan_namespaces,
         "total_workloads": len(healthy) + len(unhealthy),
         "healthy": len(healthy),
         "unhealthy": len(unhealthy),
