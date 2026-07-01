@@ -1,0 +1,35 @@
+# Test 21: Extremely high memory usage — 2Mi limit guaranteed OOM on any workload
+# Similar to test 3 but on a different workload (Deployment in data namespace)
+# Expected: patch (increase memory)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-api
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: test-api
+    version: fault-severe-oom
+  annotations:
+    kubernetes.io/change-cause: "FAULT: 2Mi memory limit — instant OOMKill"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test-api
+  template:
+    metadata:
+      labels:
+        app: test-api
+    spec:
+      containers:
+        - name: test-api
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "1Mi"
+            limits:
+              cpu: "500m"
+              memory: "2Mi"

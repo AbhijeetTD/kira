@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KIRA — Multi-Agent AI for Self-Healing Kubernetes</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=36" />
+</head>
+<body>
+
+<!-- ── Top bar ─────────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-icon-wrap" id="logo-icon-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </div>
+    <div class="logo-pulse-ring"></div>
+    <div class="logo-text-group">
+      <span class="logo-name">KIRA</span>
+      <span class="logo-tag">Multi-Agent AI · Self-Healing Kubernetes</span>
+    </div>
+  </div>
+
+  <div class="topbar-center">
+    <div class="scanning-radar" id="scanning-radar">
+      <div class="radar-ring radar-ring-1"></div>
+      <div class="radar-ring radar-ring-2"></div>
+      <div class="radar-ring radar-ring-3"></div>
+      <div class="radar-sweep"></div>
+      <div class="radar-dot"></div>
+    </div>
+    <div class="topbar-stat-pill">
+      <span class="health-dot" id="health-dot"></span>
+      <span class="health-label" id="health-label">Checking…</span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="topbar-k8s-badge">
+      <span class="k8s-icon">⎈</span>
+      <span class="k8s-label">Kubernetes</span>
+    </div>
+    <button class="btn btn-primary" id="trigger-btn">
+      <span class="trigger-bolt">⚡</span> Analyse
+    </button>
+  </div>
+</header>
+
+<!-- ── Metrics Bar ─────────────────────────────────────────────────────── -->
+<div class="metrics-bar" id="metrics-bar">
+  <div class="metric-item">
+    <span class="metric-icon">🟢</span>
+    <span class="metric-label">Active</span>
+    <span class="metric-value" id="m-active">—</span>
+  </div>
+  <div class="metric-item">
+    <span class="metric-icon">✅</span>
+    <span class="metric-label">Resolved</span>
+    <span class="metric-value" id="m-resolved">—</span>
+  </div>
+  <div class="metric-item">
+    <span class="metric-icon">❌</span>
+    <span class="metric-label">Failed</span>
+    <span class="metric-value" id="m-failed">—</span>
+  </div>
+  <div class="metric-item">
+    <span class="metric-icon">📊</span>
+    <span class="metric-label">Total</span>
+    <span class="metric-value" id="m-total">—</span>
+  </div>
+  <div class="metric-item">
+    <span class="metric-icon">⚡</span>
+    <span class="metric-label">MTTR</span>
+    <span class="metric-value" id="m-mttr">—</span>
+  </div>
+  <div class="metric-item">
+    <span class="metric-icon">🎯</span>
+    <span class="metric-label">Avg Confidence</span>
+    <span class="metric-value" id="m-confidence">—</span>
+  </div>
+  <div class="metric-item">
+    <span class="metric-icon">🤖</span>
+    <span class="metric-label">Auto-Resolved</span>
+    <span class="metric-value" id="m-auto">—</span>
+  </div>
+</div>
+
+<!-- ── Layout ──────────────────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Incidents <span class="incident-count" id="incident-count">0</span></h2>
+    </div>
+    <div class="incident-list" id="incident-list"></div>
+  </aside>
+
+  <!-- Detail panel -->
+  <main class="detail">
+    <div class="detail-header" id="detail-header" style="display:none">
+      <div class="detail-title-row">
+        <span class="detail-title" id="detail-title">—</span>
+        <span id="detail-badge"></span>
+        <button class="btn-close-detail" onclick="deselectIncident()" title="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="detail-meta">
+        <span>📁 <span id="detail-ns">—</span></span>
+        <span>🔖 <span id="detail-id">—</span></span>
+        <span>🕐 <span id="detail-started">—</span></span>
+      </div>
+    </div>
+
+    <!-- Resolved / Failed banner -->
+    <div class="resolved-banner" id="resolved-banner">
+      <span id="banner-icon">✅</span>
+      <div>
+        <div id="banner-title">Resolved</div>
+        <div id="banner-sub"></div>
+      </div>
+      <button class="btn btn-ghost" id="btn-postmortem" style="display:none"
+              onclick="generatePostmortem()">📄 Postmortem</button>
+    </div>
+
+    <!-- Approval banner -->
+    <div class="approval-banner" id="approval-banner">
+      <div class="approval-top-row">
+        <div class="approval-body" id="approval-body"></div>
+        <div class="approval-actions">
+          <button class="btn btn-success" id="btn-approve">✅ Approve &amp; Apply</button>
+          <button class="btn btn-danger"  id="btn-skip">✗ Skip</button>
+        </div>
+      </div>
+      <div class="approval-command" id="approval-command" style="display:none"></div>
+    </div>
+
+    <!-- Scrollable content: timeline + RCA + war room -->
+    <div class="detail-content" id="detail-content">
+      <div class="timeline-empty" id="timeline-empty">
+        <div class="timeline-empty-icon">🕵️</div>
+        <div>
+          Select an incident from the sidebar<br/>
+          to view the live investigation.
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat FAB -->
+    <button class="chat-fab" id="chat-fab" style="display:none" onclick="openChat()">
+      <span class="chat-fab-pulse"></span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span>Ask Sherlock</span>
+    </button>
+
+  </main>
+</div>
+
+<!-- ── Chat Drawer ─────────────────────────────────────────────────────── -->
+<div class="chat-backdrop" id="chat-backdrop" onclick="closeChat()"></div>
+<div class="chat-drawer" id="chat-drawer">
+
+  <div class="chat-drawer-header">
+    <div class="chat-avatar-wrap">
+      <div class="chat-avatar">🔍</div>
+      <span class="chat-avatar-dot"></span>
+    </div>
+    <div class="chat-drawer-meta">
+      <div class="chat-drawer-name">Sherlock AI</div>
+      <div class="chat-drawer-sub">Incident Intelligence Assistant</div>
+    </div>
+    <button class="btn-close-detail" onclick="closeChat()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="chat-messages" id="chat-messages"></div>
+
+  <div class="chat-input-area">
+    <div class="chat-input-row">
+      <input class="chat-input" id="chat-input" type="text"
+             placeholder="Ask anything about this incident…"
+             onkeydown="if(event.key==='Enter')sendChat()" />
+      <button class="chat-voice-btn" id="chat-voice-btn" onclick="toggleVoice()" title="Voice input">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+      <button class="chat-send-btn" id="chat-send-btn" onclick="sendChat()" title="Send">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Postmortem overlay ───────────────────────────────────────────────── -->
+<div class="pm-overlay" id="pm-overlay" style="display:none" onclick="if(event.target===this)closePostmortem()">
+  <div class="pm-modal">
+    <div class="pm-modal-header">
+      <span class="pm-modal-title">📄 Incident Postmortem</span>
+      <div class="pm-modal-actions">
+        <button class="btn btn-ghost" id="pm-copy-btn" onclick="copyPostmortem()">📋 Copy</button>
+        <button class="btn-close-detail" onclick="closePostmortem()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="pm-content"><div id="pm-body"></div></div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Celebration Canvas -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Contributors Button -->
+<button class="contributors-btn" id="contributors-btn" onclick="document.getElementById('contributors-modal').style.display='flex'">
+  👥 Contributors
+</button>
+
+<!-- Contributors Modal -->
+<div class="contributors-overlay" id="contributors-modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="contributors-modal">
+    <div class="contributors-modal-header">
+      <span class="contributors-modal-title">OUR <strong>CONTRIBUTORS</strong></span>
+      <button class="contributors-close-btn" onclick="document.getElementById('contributors-modal').style.display='none'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="contributors-grid">
+      <a class="contributor-card" href="https://www.linkedin.com/in/abhijeet-dhengale-56630160/" target="_blank" rel="noopener">
+        <img class="contributor-avatar" src="images/abhijeet.jpg" alt="Abhijeet Dhengale" />
+        <div class="contributor-info">
+          <span class="contributor-name">Abhijeet Dhengale</span>
+          <span class="contributor-role">CloudOps Engineer</span>
+        </div>
+      </a>
+      <a class="contributor-card" href="https://www.linkedin.com/in/ansh-dalwadi/" target="_blank" rel="noopener">
+        <img class="contributor-avatar" src="images/ansh.jpg" alt="Ansh Dalwadi" />
+        <div class="contributor-info">
+          <span class="contributor-name">Ansh Dalwadi</span>
+          <span class="contributor-role">Associate CloudOps Engineer</span>
+        </div>
+      </a>
+      <a class="contributor-card" href="https://www.linkedin.com/in/deep-trivedi-8b3537143/" target="_blank" rel="noopener">
+        <img class="contributor-avatar" src="images/deep.jpg" alt="Deep Trivedi" />
+        <div class="contributor-info">
+          <span class="contributor-name">Deep Trivedi</span>
+          <span class="contributor-role">Manager, Cloud Operations</span>
+        </div>
+      </a>
+      <a class="contributor-card" href="https://www.linkedin.com/in/manjunath28/" target="_blank" rel="noopener">
+        <img class="contributor-avatar" src="images/manjunath.jpg" alt="Manjunath Y" />
+        <div class="contributor-info">
+          <span class="contributor-name">Manjunath Y</span>
+          <span class="contributor-role">CloudOps Engineer</span>
+        </div>
+      </a>
+      <a class="contributor-card" href="https://www.linkedin.com/in/sudin-kolambkar-34956770/" target="_blank" rel="noopener">
+        <img class="contributor-avatar" src="images/sudin.jpg" alt="Sudin Kolambkar" />
+        <div class="contributor-info">
+          <span class="contributor-name">Sudin Kolambkar</span>
+          <span class="contributor-role">Senior CloudOps Engineer</span>
+        </div>
+      </a>
+      <a class="contributor-card" href="https://www.linkedin.com/in/tushi-mittal/" target="_blank" rel="noopener">
+        <img class="contributor-avatar" src="images/tushi.jpg" alt="Tushi Mittal" />
+        <div class="contributor-info">
+          <span class="contributor-name">Tushi Mittal</span>
+          <span class="contributor-role">Associate CloudOps Engineer</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=36"></script>
+</body>
+</html>

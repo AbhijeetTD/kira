@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: advanced-demo
+  labels:
+    app: cart-service
+    version: v2.1.0
+  annotations:
+    kubernetes.io/change-cause: "v2.1.0 — cost optimisation: reduced CPU limits, tuned DB pool"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "[INFO]  cart-service v2.1.0 starting..."
+              echo "[INFO]  DB_POOL_SIZE=2  (NOTE: reduced from 20 in v2.0.0)"
+              echo "[INFO]  Connecting to postgres://db-service.advanced-demo:5432/cart_db"
+              sleep 1
+              echo "[WARN]  CPU throttled: throttle_period_ratio=0.94 (cfs_quota_us=5000)"
+              echo "[ERROR] Connection pool exhausted: active=2/2 waiting=47 — all slots occupied"
+              echo "[ERROR] Request timeout: POST /api/cart/checkout exceeded 30000ms"
+              echo "[ERROR] Request timeout: POST /api/cart/checkout exceeded 30000ms"
+              echo "[ERROR] Request timeout: GET  /api/cart/items exceeded 30000ms"
+              echo "[ERROR] Health check endpoint GET /health -> 503 Service Unavailable"
+              echo "[ERROR] DB acquire timeout after 30s: cannot borrow connection from pool"
+              echo "[FATAL] Startup probe failed — connection pool deadlock detected"
+              echo "[FATAL] Shutting down with exit code 1"
+              exit 1
+          env:
+            - name: DB_POOL_SIZE
+              value: "2"
+            - name: DB_HOST
+              value: "db-service.advanced-demo"
+            - name: APP_VERSION
+              value: "v2.1.0"
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "50m"       # was 500m in v2.0.0 — 10x reduction!
+              memory: "64Mi"

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: advanced-demo
+  labels:
+    app: cart-service
+    version: v2.0.0
+  annotations:
+    kubernetes.io/change-cause: "v2.0.0 — stable release (DB_POOL_SIZE=20, CPU=500m)"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "[INFO]  cart-service v2.0.0 starting..."
+              echo "[INFO]  DB_POOL_SIZE=20 — connection pool ready"
+              echo "[INFO]  Listening on :8080"
+              # Stay alive — healthy
+              while true; do
+                echo "[INFO]  GET /health -> 200 OK"
+                sleep 30
+              done
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-service
+  namespace: advanced-demo
+spec:
+  selector:
+    app: cart-service
+  ports:
+    - port: 8080
+      targetPort: 8080

@@ -1,0 +1,53 @@
+# Test 10: Reduced replicas (scale down to 1 when 3 needed) → scale back up
+#
+# This test is applied via: kubectl scale deployment/cart-web -n demo --replicas=1
+# Then the webhook is triggered indicating availability issues.
+# The decision engine should detect insufficient replicas and scale back to 3.
+#
+# No manifest needed — this test uses kubectl scale directly.
+# This file documents the test for reference.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cart-web
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: cart-web
+    version: fault-low-replicas
+  annotations:
+    kubernetes.io/change-cause: "FAULT: manually scaled to 1 replica (needs 3)"
+spec:
+  serviceName: cart-web
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-web
+  template:
+    metadata:
+      labels:
+        app: cart-web
+    spec:
+      containers:
+        - name: cart-web
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 5

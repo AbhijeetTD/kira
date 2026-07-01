@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: advanced-demo
+  labels:
+    app: payment-service
+    version: v3.4.1
+  annotations:
+    kubernetes.io/change-cause: "v3.4.1 — stable (no recent changes)"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "[INFO]  payment-service v3.4.1 starting — no code changes since last week"
+              echo "[INFO]  Dependency check: cart-service, fraud-service, ledger-db"
+              sleep 2
+              echo "[WARN]  cart-service upstream latency: 8423ms (SLA threshold: 3000ms)"
+              echo "[WARN]  cart-service upstream latency: 12891ms — degraded"
+              echo "[ERROR] Upstream timeout: POST http://cart-service:8080/api/cart/checkout (30s)"
+              echo "[ERROR] Upstream timeout: POST http://cart-service:8080/api/cart/checkout (30s)"
+              echo "[ERROR] Cannot process payment: cart-service dependency unavailable"
+              echo "[ERROR] Health dependency check FAILED: cart-service=UNHEALTHY latency=timeout"
+              echo "[WARN]  Circuit breaker OPEN for cart-service — failing fast (no retry)"
+              echo "[ERROR] GET /health -> 503: upstream dependency cart-service is unhealthy"
+              echo "[FATAL] Readiness probe failed — shutting down"
+              exit 1
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: advanced-demo
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - port: 8080
+      targetPort: 8080

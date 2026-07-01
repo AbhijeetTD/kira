@@ -1,0 +1,704 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Turbo Platform — Realistic service landscape for KIRA demos
+# Mirrors the real Lightsaber/Turbo environment with dummy images.
+# Multi-container pods on key services (sidecars: fluent-bit, config-reloader,
+# auth-proxy, metrics-exporter).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Namespaces
+# ═══════════════════════════════════════════════════════════════════════════════
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ls-pricing-cloudops-test
+  labels:
+    platform: turbo
+    tier: pricing
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ls-data-cloudops-test
+  labels:
+    platform: turbo
+    tier: data
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ls-data-cloudops-test — Data Integration Services
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── dataintegrationservice-api (2 containers: api + fluent-bit) ─────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dataintegrationservice-api
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dataintegrationservice-api
+    component: dis
+    tier: api
+    version: "2022.8.3.20"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.3.20 — data integration API"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dataintegrationservice-api
+  template:
+    metadata:
+      labels:
+        app: dataintegrationservice-api
+        component: dis
+        tier: api
+    spec:
+      containers:
+        - name: dataintegrationservice-api
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+        - name: fluent-bit
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'fluent-bit sidecar started' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+
+# ── dis-consumerorchestrator (1 container) ──────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-consumerorchestrator
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-consumerorchestrator
+    component: dis
+    tier: worker
+    version: "2022.8.0.5"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.0.5 — consumer orchestrator"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-consumerorchestrator
+  template:
+    metadata:
+      labels:
+        app: dis-consumerorchestrator
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-consumerorchestrator
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'consumer-orchestrator running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── dis-consumerservice-group-a (1 container) ──────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-consumerservice-group-a
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-consumerservice-group-a
+    component: dis
+    tier: worker
+    version: "2022.8.0.10"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.0.10 — consumer service group-a"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-consumerservice-group-a
+  template:
+    metadata:
+      labels:
+        app: dis-consumerservice-group-a
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-consumerservice
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'consumer-service group-a running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── dis-consumerservice-group-b (1 container) ──────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-consumerservice-group-b
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-consumerservice-group-b
+    component: dis
+    tier: worker
+    version: "2022.8.0.10"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.0.10 — consumer service group-b"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-consumerservice-group-b
+  template:
+    metadata:
+      labels:
+        app: dis-consumerservice-group-b
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-consumerservice
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'consumer-service group-b running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── dis-consumerservice-group-c (1 container) ──────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-consumerservice-group-c
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-consumerservice-group-c
+    component: dis
+    tier: worker
+    version: "2022.8.0.10"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.0.10 — consumer service group-c"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-consumerservice-group-c
+  template:
+    metadata:
+      labels:
+        app: dis-consumerservice-group-c
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-consumerservice
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'consumer-service group-c running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── dis-datapullservice (1 container) ──────────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-datapullservice
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-datapullservice
+    component: dis
+    tier: worker
+    version: "2022.8.0.10"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.0.10 — data pull service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-datapullservice
+  template:
+    metadata:
+      labels:
+        app: dis-datapullservice
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-datapullservice
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'datapull-service running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── dis-pushtopicengine (1 container) ─────────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-pushtopicengine
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-pushtopicengine
+    component: dis
+    tier: worker
+    version: "2022.8.3.4"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.3.4 — push topic engine"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-pushtopicengine
+  template:
+    metadata:
+      labels:
+        app: dis-pushtopicengine
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-pushtopicengine
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'pushtopicengine running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── dis-schedulerservice (1 container) ────────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-schedulerservice
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-schedulerservice
+    component: dis
+    tier: worker
+    version: "2022.8.0.1"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.0.1 — scheduler service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-schedulerservice
+  template:
+    metadata:
+      labels:
+        app: dis-schedulerservice
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-schedulerservice
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'scheduler-service running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── dis-taskmanager (1 container) ─────────────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-taskmanager
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-taskmanager
+    component: dis
+    tier: worker
+    version: "2022.8.0.4"
+  annotations:
+    kubernetes.io/change-cause: "v2022.8.0.4 — task manager"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-taskmanager
+  template:
+    metadata:
+      labels:
+        app: dis-taskmanager
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-taskmanager
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'task-manager running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── dis-taskpoller (1 container) ──────────────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dis-taskpoller
+  namespace: ls-data-cloudops-test
+  labels:
+    app: dis-taskpoller
+    component: dis
+    tier: worker
+    version: "2022.5.1.1"
+  annotations:
+    kubernetes.io/change-cause: "v2022.5.1.1 — task poller"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dis-taskpoller
+  template:
+    metadata:
+      labels:
+        app: dis-taskpoller
+        component: dis
+        tier: worker
+    spec:
+      containers:
+        - name: dis-taskpoller
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'task-poller running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+
+# ── tenancy — ls-data (2 containers: tenancy + config-reloader) ───────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tenancy
+  namespace: ls-data-cloudops-test
+  labels:
+    app: tenancy
+    component: platform
+    tier: api
+    version: "2024.6.0.12"
+  annotations:
+    kubernetes.io/change-cause: "v2024.6.0.12 — tenancy resolver (data)"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tenancy
+  template:
+    metadata:
+      labels:
+        app: tenancy
+        component: platform
+        tier: api
+    spec:
+      containers:
+        - name: tenancy
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+        - name: config-reloader
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'config-reloader watching /etc/config' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ls-pricing-cloudops-test — Pricing Platform Services
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── admin-api (3 containers: api + fluent-bit + config-reloader) ───────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-api
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: admin-api
+    component: admin
+    tier: api
+    version: "2025.10.0.1"
+  annotations:
+    kubernetes.io/change-cause: "v2025.10.0.1 — admin API"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-api
+  template:
+    metadata:
+      labels:
+        app: admin-api
+        component: admin
+        tier: api
+    spec:
+      containers:
+        - name: admin-api
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+        - name: fluent-bit
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'fluent-bit log forwarder started' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+        - name: config-reloader
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'config-reloader watching /etc/config' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+
+# ── data-admin-api (4 containers: api + fluent-bit + config-reloader + auth-proxy) ─
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-admin-api
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: data-admin-api
+    component: admin
+    tier: api
+    version: "2025.6.0.4"
+  annotations:
+    kubernetes.io/change-cause: "v2025.6.0.4 — data admin API"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-admin-api
+  template:
+    metadata:
+      labels:
+        app: data-admin-api
+        component: admin
+        tier: api
+    spec:
+      containers:
+        - name: data-admin-api
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+        - name: fluent-bit
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'fluent-bit log forwarder started' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+        - name: config-reloader
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'config-reloader watching /etc/config' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+        - name: auth-proxy
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'auth-proxy sidecar started on :8443' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "20m", memory: "32Mi" }
+
+# ── pricing-scheduler (4 containers: scheduler + fluent-bit + config-reloader + metrics-exporter) ─
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pricing-scheduler
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: pricing-scheduler
+    component: pricing
+    tier: worker
+    version: "2024.6.0.14"
+  annotations:
+    kubernetes.io/change-cause: "v2024.6.0.14 — pricing scheduler"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pricing-scheduler
+  template:
+    metadata:
+      labels:
+        app: pricing-scheduler
+        component: pricing
+        tier: worker
+    spec:
+      containers:
+        - name: pricing-scheduler
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'pricing-scheduler running' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+        - name: fluent-bit
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'fluent-bit log forwarder started' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+        - name: config-reloader
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'config-reloader watching /etc/config' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+        - name: metrics-exporter
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'metrics-exporter on :9090' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+
+# ── tenancy — ls-pricing (2 containers: tenancy + config-reloader) ────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tenancy
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: tenancy
+    component: platform
+    tier: api
+    version: "2024.6.0.12"
+  annotations:
+    kubernetes.io/change-cause: "v2024.6.0.12 — tenancy resolver (pricing)"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tenancy
+  template:
+    metadata:
+      labels:
+        app: tenancy
+        component: platform
+        tier: api
+    spec:
+      containers:
+        - name: tenancy
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "50m", memory: "64Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+        - name: config-reloader
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'config-reloader watching /etc/config' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# StatefulSets — ls-pricing-cloudops-test
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── cart (StatefulSet, 3 containers: cart + fluent-bit + redis-cache) ──────
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cart
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: cart
+    component: pricing
+    tier: engine
+    version: "2025.10.0.17"
+  annotations:
+    kubernetes.io/change-cause: "v2025.10.0.17 — pricing cart engine"
+spec:
+  serviceName: cart
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart
+  template:
+    metadata:
+      labels:
+        app: cart
+        component: pricing
+        tier: engine
+    spec:
+      containers:
+        - name: cart
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "10m", memory: "64Mi" }
+            limits:   { cpu: "100m", memory: "128Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+        - name: fluent-bit
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'fluent-bit log forwarder started' && sleep infinity"]
+          resources:
+            requests: { cpu: "2m", memory: "16Mi" }
+            limits:   { cpu: "10m", memory: "32Mi" }
+        - name: redis-cache
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'redis sidecar cache started' && sleep infinity"]
+          resources:
+            requests: { cpu: "5m", memory: "32Mi" }
+            limits:   { cpu: "20m", memory: "64Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart
+  namespace: ls-pricing-cloudops-test
+spec:
+  clusterIP: None
+  selector:
+    app: cart
+  ports:
+    - port: 80
+      targetPort: 80

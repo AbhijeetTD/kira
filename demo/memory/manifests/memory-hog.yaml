@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: memory-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memory-hog
+  namespace: memory-demo
+  annotations:
+    kubernetes.io/change-cause: "v1.0.0 — initial deployment"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memory-hog
+  template:
+    metadata:
+      labels:
+        app: memory-hog
+    spec:
+      containers:
+        - name: memory-hog
+          image: python:3.11-slim
+          ports:
+            - containerPort: 8080
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              python3 << 'PYEOF'
+              import http.server, os, sys
+
+              _chunks = []
+              CHUNK_MB = 10
+
+              class Handler(http.server.BaseHTTPRequestHandler):
+                  def do_GET(self):
+                      if self.path == "/health":
+                          self.send_response(200)
+                          self.end_headers()
+                          self.wfile.write(b"OK")
+                          return
+
+                      # Every call to /refresh allocates another 10 MB
+                      _chunks.append(b"x" * CHUNK_MB * 1024 * 1024)
+                      used_mb = len(_chunks) * CHUNK_MB
+                      limit_mb = 128
+                      pct = int(used_mb * 100 / limit_mb)
+                      line = (
+                          f"[WARN]  Refresh #{len(_chunks):03d}: "
+                          f"heap={used_mb}Mi / {limit_mb}Mi ({pct}%) "
+                          f"{'⚠️  HIGH' if pct >= 70 else ''}"
+                      )
+                      print(line, flush=True)
+                      body = (line + "\n").encode()
+                      self.send_response(200)
+                      self.send_header("Content-Length", len(body))
+                      self.end_headers()
+                      self.wfile.write(body)
+
+                  def log_message(self, *a):
+                      pass  # silence access log
+
+              print("[INFO]  memory-hog v1.0.0 starting on :8080", flush=True)
+              print(f"[INFO]  Each GET /refresh allocates {CHUNK_MB}MB", flush=True)
+              print("[INFO]  Memory limit: 128Mi", flush=True)
+              http.server.HTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
+              PYEOF
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memory-hog
+  namespace: memory-demo
+spec:
+  selector:
+    app: memory-hog
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30880

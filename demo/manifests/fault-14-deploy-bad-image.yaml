@@ -1,0 +1,34 @@
+# Test 14: Deployment bad image tag — tests rollback on Deployment kind
+# Expected: rollback
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-api
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: test-api
+    version: fault-deploy-bad-image
+  annotations:
+    kubernetes.io/change-cause: "FAULT: bad image tag nginx:999.999-nonexistent on Deployment"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test-api
+  template:
+    metadata:
+      labels:
+        app: test-api
+    spec:
+      containers:
+        - name: test-api
+          image: nginx:999.999-nonexistent
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

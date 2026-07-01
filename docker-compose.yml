@@ -1,0 +1,32 @@
+services:
+
+  # ── Ollama — local LLM (Apple Silicon, auto-uses Metal GPU) ───────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: kira-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama    # persists downloaded model weights
+    restart: unless-stopped
+
+  # ── KIRA backend ───────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kira-backend
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      # Override OLLAMA_BASE_URL so the container talks to the ollama service
+      - OLLAMA_BASE_URL=http://ollama:11434/v1
+    volumes:
+      - "${HOME}/.kube/config:/root/.kube/config:ro"
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

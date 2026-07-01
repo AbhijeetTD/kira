@@ -1,0 +1,48 @@
+# Test 20: Wrong container port — app on 80 but containerPort says 8080
+# Readiness probe will fail → not ready
+# Expected: rollback
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cart-web
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: cart-web
+    version: fault-wrong-port
+  annotations:
+    kubernetes.io/change-cause: "FAULT: readiness probe on port 8080 but nginx on 80"
+spec:
+  serviceName: cart-web
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cart-web
+  template:
+    metadata:
+      labels:
+        app: cart-web
+    spec:
+      containers:
+        - name: cart-web
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

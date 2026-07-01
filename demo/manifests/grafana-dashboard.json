@@ -1,0 +1,162 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "kira-services",
+    "title": "KIRA — Service Health",
+    "tags": ["kira", "turbo", "services"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": { "from": "now-1h", "to": "now" },
+    "templating": {
+      "list": [
+        {
+          "name": "namespace",
+          "type": "query",
+          "datasource": { "uid": "PBFA97CFB590B2093" },
+          "query": "label_values(kube_pod_info, namespace)",
+          "refresh": 2,
+          "includeAll": true,
+          "multi": true,
+          "current": { "text": "All", "value": "$__all" }
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Pods by Status",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 5, "x": 0, "y": 0 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "count(kube_pod_status_phase{namespace=~\"$namespace\", phase=\"Running\"} == 1)", "legendFormat": "Running", "refId": "A" }
+        ],
+        "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" }, "thresholds": { "steps": [{"value": null, "color": "green"}] } } }
+      },
+      {
+        "id": 2,
+        "title": "Pods Not Ready",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 5, "x": 5, "y": 0 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "count(kube_pod_status_ready{namespace=~\"$namespace\", condition=\"true\"} == 0 and on(pod,namespace) kube_pod_status_phase{phase=\"Running\"} == 1) or vector(0)", "legendFormat": "Not Ready", "refId": "A" }
+        ],
+        "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "orange" }, "thresholds": { "steps": [{"value": null, "color": "green"}, {"value": 1, "color": "orange"}, {"value": 3, "color": "red"}] } } }
+      },
+      {
+        "id": 3,
+        "title": "CrashLoopBackOff",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 5, "x": 10, "y": 0 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "count(kube_pod_container_status_waiting_reason{namespace=~\"$namespace\", reason=\"CrashLoopBackOff\"} > 0) or vector(0)", "legendFormat": "CrashLoop", "refId": "A" }
+        ],
+        "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" }, "thresholds": { "steps": [{"value": null, "color": "green"}, {"value": 1, "color": "red"}] } } }
+      },
+      {
+        "id": 4,
+        "title": "OOMKilled (last 1h)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 5, "x": 15, "y": 0 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "count(kube_pod_container_status_last_terminated_reason{namespace=~\"$namespace\", reason=\"OOMKilled\"} > 0) or vector(0)", "legendFormat": "OOMKilled", "refId": "A" }
+        ],
+        "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "purple" }, "thresholds": { "steps": [{"value": null, "color": "green"}, {"value": 1, "color": "purple"}] } } }
+      },
+      {
+        "id": 12,
+        "title": "ImagePullBackOff",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "count(kube_pod_container_status_waiting_reason{namespace=~\"$namespace\", reason=~\"ImagePullBackOff|ErrImagePull\"} > 0) or vector(0)", "legendFormat": "ImagePull", "refId": "A" }
+        ],
+        "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "dark-red" }, "thresholds": { "steps": [{"value": null, "color": "green"}, {"value": 1, "color": "dark-red"}] } } }
+      },
+      {
+        "id": 5,
+        "title": "Pod Restarts (per pod, last 1h)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "increase(kube_pod_container_status_restarts_total{namespace=~\"$namespace\"}[1h]) > 0", "legendFormat": "{{namespace}}/{{pod}}", "refId": "A" }
+        ],
+        "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 30 } } }
+      },
+      {
+        "id": 6,
+        "title": "Container Memory Usage",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "sum by (pod, namespace) (container_memory_working_set_bytes{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"})", "legendFormat": "{{namespace}}/{{pod}}", "refId": "A" }
+        ],
+        "fieldConfig": { "defaults": { "unit": "bytes", "custom": { "fillOpacity": 10 } } }
+      },
+      {
+        "id": 7,
+        "title": "Container CPU Usage",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "sum by (pod, namespace) (rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\", container!=\"\", container!=\"POD\"}[5m]))", "legendFormat": "{{namespace}}/{{pod}}", "refId": "A" }
+        ],
+        "fieldConfig": { "defaults": { "unit": "short", "custom": { "fillOpacity": 10 } } }
+      },
+      {
+        "id": 8,
+        "title": "Deployment Replicas — Available vs Desired",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "kube_deployment_status_replicas_available{namespace=~\"$namespace\"}", "legendFormat": "", "refId": "A", "format": "table", "instant": true },
+          { "expr": "kube_deployment_spec_replicas{namespace=~\"$namespace\"}", "legendFormat": "", "refId": "B", "format": "table", "instant": true }
+        ],
+        "transformations": [
+          { "id": "merge", "options": {} },
+          { "id": "organize", "options": { "excludeByName": { "Time": true, "job": true, "instance": true, "__name__": true }, "renameByName": { "deployment": "Deployment", "namespace": "Namespace", "Value #A": "Available", "Value #B": "Desired" } } }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Pod Status by Namespace",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 28 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "count by (namespace, phase) (kube_pod_status_phase{namespace=~\"$namespace\"} == 1)", "legendFormat": "{{namespace}} — {{phase}}", "refId": "A" }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Container Restart Reasons",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 28 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "count by (reason) (kube_pod_container_status_last_terminated_reason{namespace=~\"$namespace\"} > 0)", "legendFormat": "{{reason}}", "refId": "A" }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Waiting Containers by Reason",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 28 },
+        "datasource": { "uid": "PBFA97CFB590B2093" },
+        "targets": [
+          { "expr": "count by (reason) (kube_pod_container_status_waiting_reason{namespace=~\"$namespace\"} > 0)", "legendFormat": "{{reason}}", "refId": "A" }
+        ]
+      }
+    ],
+    "schemaVersion": 39
+  },
+  "overwrite": true
+}

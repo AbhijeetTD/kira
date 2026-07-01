@@ -1,0 +1,45 @@
+# Test 15: Multi-container pod — sidecar crash while main container is fine
+# Expected: rollback (sidecar crash causes pod not-ready)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cart-web
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: cart-web
+    version: fault-sidecar-crash
+  annotations:
+    kubernetes.io/change-cause: "FAULT: crashing sidecar container alongside healthy nginx"
+spec:
+  serviceName: cart-web
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cart-web
+  template:
+    metadata:
+      labels:
+        app: cart-web
+    spec:
+      containers:
+        - name: cart-web
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+        - name: log-shipper
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'sidecar FATAL: cannot connect to log endpoint' && exit 1"]
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"

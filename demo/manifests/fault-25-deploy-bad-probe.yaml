@@ -1,0 +1,47 @@
+# Test 25: Deployment bad probe path — readiness probe 404
+# Expected: rollback
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-api
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: test-api
+    version: fault-deploy-bad-probe
+  annotations:
+    kubernetes.io/change-cause: "FAULT: readiness probe path /healthz/nonexistent on Deployment"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test-api
+  template:
+    metadata:
+      labels:
+        app: test-api
+    spec:
+      containers:
+        - name: test-api
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /healthz/nonexistent
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 3
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10

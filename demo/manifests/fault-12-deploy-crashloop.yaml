@@ -1,0 +1,33 @@
+# Test 12: Deployment CrashLoopBackOff — tests agent on Deployment (not StatefulSet)
+# Expected: rollback
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-api
+  namespace: ls-pricing-cloudops-test
+  labels:
+    app: test-api
+    version: fault-deploy-crash
+  annotations:
+    kubernetes.io/change-cause: "FAULT: busybox crash loop on Deployment"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test-api
+  template:
+    metadata:
+      labels:
+        app: test-api
+    spec:
+      containers:
+        - name: test-api
+          image: busybox:1.36
+          command: ["sh", "-c", "echo 'FATAL: config missing' && exit 1"]
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
