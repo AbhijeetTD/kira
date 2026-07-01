@@ -8,6 +8,12 @@ GET  /incidents               List all incidents (summary)
 GET  /incidents/{id}          Full incident detail
 GET  /incidents/{id}/stream   Server-Sent Events — live investigation timeline
 GET  /health                  Liveness + LLM reachability check
+GET  /settings                Return current settings (tokens masked)
+POST /settings                Update settings → write to .env + hot-reload
+GET  /settings/kube-contexts  List available kubectl contexts
+GET  /settings/ollama-models  List locally available Ollama models
+POST /settings/test/jira      Test Jira API connectivity
+POST /settings/test/teams     Test Teams webhook connectivity
 """
 from __future__ import annotations
 
@@ -40,6 +46,7 @@ from backend.integrations import k8s_client as k8s
 from backend.integrations import jira_client as jira
 from backend.integrations.openai_client import check_health as llm_health
 from backend.integrations.alert_parsers import parse_grafana_webhook
+from backend.settings_routes import router as settings_router
 from backend.models.incident import (
     AlertPayload,
     Incident,
@@ -88,6 +95,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(settings_router)
 
 
 # ── Emit queue — appends to incident timeline and notifies SSE waiters ──────

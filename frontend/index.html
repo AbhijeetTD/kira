@@ -48,6 +48,13 @@
     <button class="btn btn-primary" id="trigger-btn">
       <span class="trigger-bolt">⚡</span> Analyse
     </button>
+    <button class="btn btn-settings" id="settings-btn" onclick="openSettings()" title="Integrations & Settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Settings
+    </button>
   </div>
 </header>
 
@@ -236,6 +243,162 @@
 <canvas id="confetti-canvas"></canvas>
 
 
+
+<!-- ── Settings Modal ──────────────────────────────────────────────────────── -->
+<div class="settings-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()" style="display:none">
+  <div class="settings-modal">
+
+    <div class="settings-header">
+      <div class="settings-header-left">
+        <span class="settings-icon">⚙️</span>
+        <div>
+          <div class="settings-title">Integrations &amp; Settings</div>
+          <div class="settings-subtitle">Configure KIRA — changes apply instantly, saved to .env</div>
+        </div>
+      </div>
+      <button class="btn-close-detail" onclick="closeSettings()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="settings-tabs">
+      <button class="settings-tab active" data-tab="ollama" onclick="switchTab('ollama')">🦙 Ollama</button>
+      <button class="settings-tab" data-tab="kubernetes" onclick="switchTab('kubernetes')">⎈ Kubernetes</button>
+      <button class="settings-tab" data-tab="behaviour" onclick="switchTab('behaviour')">🎛️ Behaviour</button>
+      <button class="settings-tab" data-tab="jira" onclick="switchTab('jira')">🎫 Jira</button>
+      <button class="settings-tab" data-tab="teams" onclick="switchTab('teams')">💬 Teams</button>
+    </div>
+
+    <!-- Tab: Ollama -->
+    <div class="settings-pane active" id="tab-ollama">
+      <div class="settings-section-title">🦙 Ollama — Local LLM Runtime</div>
+      <div class="settings-hint">Ollama runs LLMs locally on your machine. <a href="https://ollama.com" target="_blank" rel="noopener">Install Ollama →</a></div>
+      <div class="settings-field">
+        <label class="settings-label">Base URL</label>
+        <input class="settings-input" id="s-ollama-url" type="text" placeholder="http://localhost:11434/v1" />
+        <span class="settings-field-hint">Ollama API endpoint. Default works for local install.</span>
+      </div>
+      <div class="settings-field">
+        <label class="settings-label">Model</label>
+        <div class="settings-input-row">
+          <select class="settings-select" id="s-ollama-model"></select>
+          <button class="btn-icon" onclick="loadOllamaModels()" title="Refresh models">🔄</button>
+        </div>
+        <span class="settings-field-hint">Pull a model first: <code>ollama pull llama3.2</code></span>
+      </div>
+    </div>
+
+    <!-- Tab: Kubernetes -->
+    <div class="settings-pane" id="tab-kubernetes">
+      <div class="settings-section-title">⎈ Kubernetes Cluster</div>
+      <div class="settings-hint">KIRA will scan and remediate workloads in the selected context.</div>
+      <div class="settings-field">
+        <label class="settings-label">Cluster Context</label>
+        <div class="settings-input-row">
+          <select class="settings-select" id="s-kube-context"></select>
+          <button class="btn-icon" onclick="loadKubeContexts()" title="Refresh contexts">🔄</button>
+        </div>
+        <span class="settings-field-hint">Run <code>kubectl config get-contexts</code> to see available contexts.</span>
+      </div>
+      <div class="settings-field">
+        <label class="settings-label">Default Namespace</label>
+        <input class="settings-input" id="s-namespace" type="text" placeholder="default" />
+        <span class="settings-field-hint">Namespace KIRA monitors. The /scan endpoint will discover all non-system namespaces automatically.</span>
+      </div>
+    </div>
+
+    <!-- Tab: Behaviour -->
+    <div class="settings-pane" id="tab-behaviour">
+      <div class="settings-section-title">🎛️ Remediation Behaviour</div>
+      <div class="settings-field">
+        <label class="settings-label">Approval Mode</label>
+        <div class="settings-toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="s-approval-mode" />
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label" id="s-approval-label">Require approval when confidence is low</span>
+        </div>
+        <span class="settings-field-hint">When ON: KIRA asks for your approval if confidence is below the threshold. When OFF: fully autonomous.</span>
+      </div>
+      <div class="settings-field">
+        <label class="settings-label">Auto-Approve Threshold: <strong id="threshold-display">90%</strong></label>
+        <input class="settings-range" id="s-threshold" type="range" min="0" max="100" value="90"
+               oninput="document.getElementById('threshold-display').textContent=this.value+'%'" />
+        <div class="settings-range-labels"><span>0% — Always ask</span><span>100% — Always auto-fix</span></div>
+        <span class="settings-field-hint">If LLM confidence ≥ this %, KIRA remediates automatically without asking.</span>
+      </div>
+    </div>
+
+    <!-- Tab: Jira -->
+    <div class="settings-pane" id="tab-jira">
+      <div class="settings-section-title">🎫 Jira Integration</div>
+      <div class="settings-hint">Automatically creates and closes Jira tickets for every incident.</div>
+      <div class="settings-field">
+        <label class="settings-label">Enable Jira</label>
+        <div class="settings-toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="s-jira-enabled" onchange="toggleJiraFields()" />
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Create and close Jira tickets automatically</span>
+        </div>
+      </div>
+      <div id="jira-fields">
+        <div class="settings-field">
+          <label class="settings-label">Jira Cloud URL</label>
+          <input class="settings-input" id="s-jira-url" type="url" placeholder="https://your-company.atlassian.net" />
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Email</label>
+          <input class="settings-input" id="s-jira-email" type="email" placeholder="you@company.com" />
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">API Token</label>
+          <input class="settings-input" id="s-jira-token" type="password" placeholder="Your Jira API token" />
+          <span class="settings-field-hint">Generate at <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener">id.atlassian.com → API tokens →</a></span>
+        </div>
+        <div class="settings-field settings-two-col">
+          <div>
+            <label class="settings-label">Project Key</label>
+            <input class="settings-input" id="s-jira-project" type="text" placeholder="KS" />
+            <span class="settings-field-hint">e.g. OPS, INFRA, KS</span>
+          </div>
+          <div>
+            <label class="settings-label">Issue Type</label>
+            <select class="settings-select" id="s-jira-type">
+              <option>Task</option><option>Bug</option><option>Story</option><option>Incident</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-test" id="btn-test-jira" onclick="testJira()">🔌 Test Connection</button>
+        <span class="test-status" id="jira-test-status"></span>
+      </div>
+    </div>
+
+    <!-- Tab: Teams -->
+    <div class="settings-pane" id="tab-teams">
+      <div class="settings-section-title">💬 Microsoft Teams</div>
+      <div class="settings-hint">Sends incident alerts and resolution summaries to a Teams channel.</div>
+      <div class="settings-field">
+        <label class="settings-label">Webhook URL</label>
+        <input class="settings-input" id="s-teams-url" type="url" placeholder="https://your-org.webhook.office.com/webhookb2/…" />
+        <span class="settings-field-hint">Teams → channel → ··· → Connectors → Incoming Webhook → Copy URL</span>
+      </div>
+      <button class="btn-test" id="btn-test-teams" onclick="testTeams()">🔌 Test Connection</button>
+      <span class="test-status" id="teams-test-status"></span>
+    </div>
+
+    <!-- Footer -->
+    <div class="settings-footer">
+      <span class="settings-save-status" id="settings-save-status"></span>
+      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">💾 Save Changes</button>
+    </div>
+
+  </div>
+</div>
 
 <script src="app.js?v=37"></script>
 </body>

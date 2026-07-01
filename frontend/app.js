@@ -1276,3 +1276,251 @@ function showAlertToast(service) {
   showToast('alert', '🚨', 'INCIDENT DETECTED',
     `${service} — investigation started`, 3000);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SETTINGS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function openSettings() {
+  document.getElementById('settings-overlay').style.display = 'flex';
+  loadSettings();
+  loadKubeContexts();
+  loadOllamaModels();
+}
+
+function closeSettings() {
+  document.getElementById('settings-overlay').style.display = 'none';
+  document.getElementById('settings-save-status').textContent = '';
+  document.getElementById('settings-save-status').className = 'settings-save-status';
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.settings-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.settings-pane').forEach(p =>
+    p.classList.toggle('active', p.id === `tab-${name}`));
+}
+
+// ── Load current settings from backend ────────────────────────────────────
+async function loadSettings() {
+  try {
+    const r = await fetch(`${API}/settings`);
+    const d = await r.json();
+
+    // Ollama
+    setVal('s-ollama-url', d.ollama_base_url || '');
+    // model is set after models load
+    window._currentOllamaModel = d.ollama_model || '';
+
+    // Kubernetes
+    window._currentKubeContext = d.kube_context || '';
+    setVal('s-namespace', d.default_namespace || 'default');
+
+    // Behaviour
+    const approvalEl = document.getElementById('s-approval-mode');
+    if (approvalEl) approvalEl.checked = (d.approval_mode === 'true' || d.approval_mode === true);
+    const threshold = parseInt(d.auto_approve_threshold) || 90;
+    const threshEl = document.getElementById('s-threshold');
+    if (threshEl) { threshEl.value = threshold; }
+    const dispEl = document.getElementById('threshold-display');
+    if (dispEl) dispEl.textContent = threshold + '%';
+
+    // Teams (masked)
+    setVal('s-teams-url', d.teams_webhook_url || '');
+
+    // Jira
+    const jiraEnabledEl = document.getElementById('s-jira-enabled');
+    if (jiraEnabledEl) {
+      jiraEnabledEl.checked = (d.jira_enabled === 'true' || d.jira_enabled === true);
+      toggleJiraFields();
+    }
+    setVal('s-jira-url', d.jira_url || '');
+    setVal('s-jira-email', d.jira_email || '');
+    setVal('s-jira-token', d.jira_api_token || '');
+    setVal('s-jira-project', d.jira_project_key || 'KS');
+    const jiraTypeEl = document.getElementById('s-jira-type');
+    if (jiraTypeEl) jiraTypeEl.value = d.jira_issue_type || 'Task';
+  } catch (e) {
+    console.warn('loadSettings failed:', e);
+  }
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+// ── Load available Ollama models ───────────────────────────────────────────
+async function loadOllamaModels() {
+  const sel = document.getElementById('s-ollama-model');
+  if (!sel) return;
+  try {
+    const r = await fetch(`${API}/settings/ollama-models`);
+    const d = await r.json();
+    const current = window._currentOllamaModel
+      || document.getElementById('s-ollama-url')?.value
+      || 'llama3.2';
+    sel.innerHTML = '';
+    const models = d.models && d.models.length
+      ? d.models
+      : [current || 'llama3.2'];
+    models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      if (m === (window._currentOllamaModel || current)) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    if (!d.models || !d.models.length) {
+      const opt = document.createElement('option');
+      opt.value = current;
+      opt.textContent = current + ' (Ollama not running)';
+      sel.appendChild(opt);
+    }
+  } catch {
+    sel.innerHTML = `<option value="${window._currentOllamaModel || 'llama3.2'}">${window._currentOllamaModel || 'llama3.2'} (offline)</option>`;
+  }
+}
+
+// ── Load available kubectl contexts ───────────────────────────────────────
+async function loadKubeContexts() {
+  const sel = document.getElementById('s-kube-context');
+  if (!sel) return;
+  try {
+    const r = await fetch(`${API}/settings/kube-contexts`);
+    const d = await r.json();
+    sel.innerHTML = '';
+    const contexts = d.contexts && d.contexts.length ? d.contexts : ['default'];
+    const current = window._currentKubeContext || d.current || '';
+    contexts.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c === d.current ? `${c}  ✓` : c;
+      if (c === current) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    if (!d.contexts || !d.contexts.length) {
+      const opt = document.createElement('option');
+      opt.value = current;
+      opt.textContent = `${current || 'No context found'} (check kubectl)`;
+      sel.appendChild(opt);
+    }
+  } catch {
+    const sel2 = document.getElementById('s-kube-context');
+    if (sel2) sel2.innerHTML = `<option value="">Could not reach kubectl</option>`;
+  }
+}
+
+// ── Save settings ──────────────────────────────────────────────────────────
+async function saveSettings() {
+  const status = document.getElementById('settings-save-status');
+  status.textContent = 'Saving…';
+  status.className = 'settings-save-status';
+
+  const approvalEl = document.getElementById('s-approval-mode');
+  const jiraEnabledEl = document.getElementById('s-jira-enabled');
+
+  const payload = {
+    ollama_base_url:        document.getElementById('s-ollama-url')?.value || null,
+    ollama_model:           document.getElementById('s-ollama-model')?.value || null,
+    kube_context:           document.getElementById('s-kube-context')?.value || null,
+    default_namespace:      document.getElementById('s-namespace')?.value || null,
+    approval_mode:          approvalEl ? String(approvalEl.checked) : null,
+    auto_approve_threshold: document.getElementById('s-threshold')?.value || null,
+    teams_webhook_url:      document.getElementById('s-teams-url')?.value || null,
+    jira_enabled:           jiraEnabledEl ? String(jiraEnabledEl.checked) : null,
+    jira_url:               document.getElementById('s-jira-url')?.value || null,
+    jira_email:             document.getElementById('s-jira-email')?.value || null,
+    jira_api_token:         document.getElementById('s-jira-token')?.value || null,
+    jira_project_key:       document.getElementById('s-jira-project')?.value || null,
+    jira_issue_type:        document.getElementById('s-jira-type')?.value || null,
+  };
+
+  // Remove nulls
+  Object.keys(payload).forEach(k => payload[k] === null && delete payload[k]);
+
+  try {
+    const r = await fetch(`${API}/settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const d = await r.json();
+    if (d.saved) {
+      status.textContent = `✅ Saved (${d.updated_keys.length} settings updated)`;
+      status.className = 'settings-save-status ok';
+      // Refresh health bar to reflect new model/context
+      checkHealth();
+    } else {
+      status.textContent = d.message || 'No changes detected.';
+      status.className = 'settings-save-status';
+    }
+  } catch (e) {
+    status.textContent = '❌ Save failed — is KIRA running?';
+    status.className = 'settings-save-status error';
+  }
+}
+
+// ── Test Jira connection ───────────────────────────────────────────────────
+async function testJira() {
+  const btn = document.getElementById('btn-test-jira');
+  const statusEl = document.getElementById('jira-test-status');
+  btn.disabled = true;
+  statusEl.textContent = 'Testing…';
+  statusEl.className = 'test-status';
+
+  try {
+    const r = await fetch(`${API}/settings/test/jira`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jira_url:       document.getElementById('s-jira-url')?.value,
+        jira_email:     document.getElementById('s-jira-email')?.value,
+        jira_api_token: document.getElementById('s-jira-token')?.value,
+      }),
+    });
+    const d = await r.json();
+    statusEl.textContent = (d.ok ? '✅ ' : '❌ ') + d.message;
+    statusEl.className = `test-status ${d.ok ? 'ok' : 'error'}`;
+  } catch {
+    statusEl.textContent = '❌ Could not reach backend';
+    statusEl.className = 'test-status error';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Test Teams connection ──────────────────────────────────────────────────
+async function testTeams() {
+  const btn = document.getElementById('btn-test-teams');
+  const statusEl = document.getElementById('teams-test-status');
+  btn.disabled = true;
+  statusEl.textContent = 'Sending…';
+  statusEl.className = 'test-status';
+
+  try {
+    const r = await fetch(`${API}/settings/test/teams`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        teams_webhook_url: document.getElementById('s-teams-url')?.value,
+      }),
+    });
+    const d = await r.json();
+    statusEl.textContent = (d.ok ? '✅ ' : '❌ ') + d.message;
+    statusEl.className = `test-status ${d.ok ? 'ok' : 'error'}`;
+  } catch {
+    statusEl.textContent = '❌ Could not reach backend';
+    statusEl.className = 'test-status error';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Toggle Jira field visibility ───────────────────────────────────────────
+function toggleJiraFields() {
+  const enabled = document.getElementById('s-jira-enabled')?.checked;
+  const fields = document.getElementById('jira-fields');
+  if (fields) fields.classList.toggle('disabled', !enabled);
+}
+
