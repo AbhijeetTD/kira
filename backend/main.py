@@ -411,6 +411,48 @@ async def list_incidents():
     ]
 
 
+@app.get("/metrics")
+async def get_metrics():
+    """Aggregated dashboard metrics derived from the in-memory incident store."""
+    TERMINAL = {"resolved", "failed", "skipped"}
+    all_inc = list(incidents.values())
+
+    active_count   = sum(1 for i in all_inc if i.status not in TERMINAL)
+    resolved_count = sum(1 for i in all_inc if i.status == "resolved")
+    failed_count   = sum(1 for i in all_inc if i.status == "failed")
+    total_count    = len(all_inc)
+
+    resolved_with_time = [
+        i for i in all_inc
+        if i.status == "resolved" and i.total_time_seconds is not None
+    ]
+    avg_mttr = (
+        round(sum(i.total_time_seconds for i in resolved_with_time) / len(resolved_with_time))
+        if resolved_with_time else None
+    )
+
+    with_conf = [i for i in all_inc if i.rca and i.rca.confidence is not None]
+    avg_confidence = (
+        round(sum(i.rca.confidence for i in with_conf) / len(with_conf))
+        if with_conf else None
+    )
+
+    auto_resolved = sum(
+        1 for i in all_inc
+        if i.status == "resolved" and getattr(i.alert, "source", None) != "manual"
+    )
+
+    return {
+        "active_count":    active_count,
+        "resolved_count":  resolved_count,
+        "failed_count":    failed_count,
+        "total_count":     total_count,
+        "avg_mttr":        avg_mttr,
+        "avg_confidence":  avg_confidence,
+        "auto_resolved":   auto_resolved,
+    }
+
+
 @app.get("/incidents/{incident_id}")
 async def get_incident(incident_id: str):
     if incident_id not in incidents:

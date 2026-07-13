@@ -1,405 +1,884 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KIRA — Multi-Agent AI for Self-Healing Kubernetes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>" />
+  <title>KIRA — Self-Healing Kubernetes with Multi-Agent AI</title>
+  <meta name="description"
+    content="KIRA uses multi-agent AI to automatically detect, investigate, and remediate Kubernetes incidents — before they impact users." />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⎈</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=36" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=38" />
 </head>
+
 <body>
 
-<!-- ── Top bar ─────────────────────────────────────────────────────────── -->
-<header class="topbar">
-  <div class="logo">
-    <div class="logo-icon-wrap" id="logo-icon-wrap">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    </div>
-    <div class="logo-pulse-ring"></div>
-    <div class="logo-text-group">
-      <span class="logo-name">KIRA</span>
-      <span class="logo-tag">Multi-Agent AI · Self-Healing Kubernetes</span>
-    </div>
-  </div>
+  <!-- ══════════════════════════════════════════════════════════
+     LANDING PAGE
+═══════════════════════════════════════════════════════════ -->
+  <div id="landing-page" class="landing-page">
 
-  <div class="topbar-center">
-    <div class="scanning-radar" id="scanning-radar">
-      <div class="radar-ring radar-ring-1"></div>
-      <div class="radar-ring radar-ring-2"></div>
-      <div class="radar-ring radar-ring-3"></div>
-      <div class="radar-sweep"></div>
-      <div class="radar-dot"></div>
-    </div>
-    <div class="topbar-stat-pill">
-      <span class="health-dot" id="health-dot"></span>
-      <span class="health-label" id="health-label">Checking…</span>
-    </div>
-  </div>
-
-  <div class="topbar-right">
-    <div class="topbar-k8s-badge">
-      <span class="k8s-icon">⎈</span>
-      <span class="k8s-label">Kubernetes</span>
-    </div>
-    <button class="btn btn-primary" id="trigger-btn">
-      <span class="trigger-bolt">⚡</span> Analyse
-    </button>
-    <button class="btn btn-settings" id="settings-btn" onclick="openSettings()" title="Integrations & Settings">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-      Settings
-    </button>
-  </div>
-</header>
-
-<!-- ── Metrics Bar ─────────────────────────────────────────────────────── -->
-<div class="metrics-bar" id="metrics-bar">
-  <div class="metric-item">
-    <span class="metric-icon">🟢</span>
-    <span class="metric-label">Active</span>
-    <span class="metric-value" id="m-active">—</span>
-  </div>
-  <div class="metric-item">
-    <span class="metric-icon">✅</span>
-    <span class="metric-label">Resolved</span>
-    <span class="metric-value" id="m-resolved">—</span>
-  </div>
-  <div class="metric-item">
-    <span class="metric-icon">❌</span>
-    <span class="metric-label">Failed</span>
-    <span class="metric-value" id="m-failed">—</span>
-  </div>
-  <div class="metric-item">
-    <span class="metric-icon">📊</span>
-    <span class="metric-label">Total</span>
-    <span class="metric-value" id="m-total">—</span>
-  </div>
-  <div class="metric-item">
-    <span class="metric-icon">⚡</span>
-    <span class="metric-label">MTTR</span>
-    <span class="metric-value" id="m-mttr">—</span>
-  </div>
-  <div class="metric-item">
-    <span class="metric-icon">🎯</span>
-    <span class="metric-label">Avg Confidence</span>
-    <span class="metric-value" id="m-confidence">—</span>
-  </div>
-  <div class="metric-item">
-    <span class="metric-icon">🤖</span>
-    <span class="metric-label">Auto-Resolved</span>
-    <span class="metric-value" id="m-auto">—</span>
-  </div>
-</div>
-
-<!-- ── Layout ──────────────────────────────────────────────────────────── -->
-<div class="layout">
-
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h2>Incidents <span class="incident-count" id="incident-count">0</span></h2>
-    </div>
-    <div class="incident-list" id="incident-list"></div>
-  </aside>
-
-  <!-- Detail panel -->
-  <main class="detail">
-    <div class="detail-header" id="detail-header" style="display:none">
-      <div class="detail-title-row">
-        <span class="detail-title" id="detail-title">—</span>
-        <span id="detail-badge"></span>
-        <button class="btn-close-detail" onclick="deselectIncident()" title="Close">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="detail-meta">
-        <span>📁 <span id="detail-ns">—</span></span>
-        <span>🔖 <span id="detail-id">—</span></span>
-        <span>🕐 <span id="detail-started">—</span></span>
-      </div>
-    </div>
-
-    <!-- Resolved / Failed banner -->
-    <div class="resolved-banner" id="resolved-banner">
-      <span id="banner-icon">✅</span>
-      <div>
-        <div id="banner-title">Resolved</div>
-        <div id="banner-sub"></div>
-      </div>
-      <button class="btn btn-ghost" id="btn-postmortem" style="display:none"
-              onclick="generatePostmortem()">📄 Postmortem</button>
-    </div>
-
-    <!-- Approval banner -->
-    <div class="approval-banner" id="approval-banner">
-      <div class="approval-top-row">
-        <div class="approval-body" id="approval-body"></div>
-        <div class="approval-actions">
-          <button class="btn btn-success" id="btn-approve">✅ Approve &amp; Apply</button>
-          <button class="btn btn-danger"  id="btn-skip">✗ Skip</button>
+    <!-- Nav -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a class="nav-logo" href="#" onclick="return false;">
+          <div class="nav-logo-icon">⎈</div>
+          <span class="nav-logo-text">KIRA</span>
+        </a>
+        <div class="nav-links">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#how" class="nav-link">How it works</a>
+          <a href="#agents" class="nav-link">Agents</a>
+          <a href="https://github.com" target="_blank" class="nav-link">Docs</a>
+        </div>
+        <div class="nav-actions">
+          <button class="nav-profile-btn" onclick="openProfileModal()">
+            <img src="images/abhijeet.jpg" alt="Abhijeet Dhengale" />
+            <span>Contributor</span>
+          </button>
+          <button class="nav-btn-ghost" onclick="checkHealthAndLaunch()">Log in</button>
+          <button class="nav-btn-primary" onclick="checkHealthAndLaunch()">Open Dashboard →</button>
         </div>
       </div>
-      <div class="approval-command" id="approval-command" style="display:none"></div>
-    </div>
+    </nav>
 
-    <!-- Scrollable content: timeline + RCA + war room -->
-    <div class="detail-content" id="detail-content">
-      <div class="timeline-empty" id="timeline-empty">
-        <div class="timeline-empty-icon">🕵️</div>
-        <div>
-          Select an incident from the sidebar<br/>
-          to view the live investigation.
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Multi-Agent AI · Self-Healing Kubernetes
         </div>
-      </div>
-    </div>
 
-    <!-- Chat FAB -->
-    <button class="chat-fab" id="chat-fab" style="display:none" onclick="openChat()">
-      <span class="chat-fab-pulse"></span>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-      <span>Ask Sherlock</span>
-    </button>
+        <h1 class="hero-title">
+          Your cluster heals<br />
+          <span class="hero-title-accent">&lt;itself&gt;</span><br />
+          we take care of the rest.
+        </h1>
 
-  </main>
-</div>
+        <p class="hero-sub">
+          KIRA continuously scans your Kubernetes workloads, deploys AI agents<br />
+          to investigate incidents, and autonomously remediates before users notice.
+        </p>
 
-<!-- ── Chat Drawer ─────────────────────────────────────────────────────── -->
-<div class="chat-backdrop" id="chat-backdrop" onclick="closeChat()"></div>
-<div class="chat-drawer" id="chat-drawer">
-
-  <div class="chat-drawer-header">
-    <div class="chat-avatar-wrap">
-      <div class="chat-avatar">🔍</div>
-      <span class="chat-avatar-dot"></span>
-    </div>
-    <div class="chat-drawer-meta">
-      <div class="chat-drawer-name">Sherlock AI</div>
-      <div class="chat-drawer-sub">Incident Intelligence Assistant</div>
-    </div>
-    <button class="btn-close-detail" onclick="closeChat()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  </div>
-
-  <div class="chat-messages" id="chat-messages"></div>
-
-  <div class="chat-input-area">
-    <div class="chat-input-row">
-      <input class="chat-input" id="chat-input" type="text"
-             placeholder="Ask anything about this incident…"
-             onkeydown="if(event.key==='Enter')sendChat()" />
-      <button class="chat-voice-btn" id="chat-voice-btn" onclick="toggleVoice()" title="Voice input">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-          <line x1="12" y1="19" x2="12" y2="23"/>
-          <line x1="8" y1="23" x2="16" y2="23"/>
-        </svg>
-      </button>
-      <button class="chat-send-btn" id="chat-send-btn" onclick="sendChat()" title="Send">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Postmortem overlay ───────────────────────────────────────────────── -->
-<div class="pm-overlay" id="pm-overlay" style="display:none" onclick="if(event.target===this)closePostmortem()">
-  <div class="pm-modal">
-    <div class="pm-modal-header">
-      <span class="pm-modal-title">📄 Incident Postmortem</span>
-      <div class="pm-modal-actions">
-        <button class="btn btn-ghost" id="pm-copy-btn" onclick="copyPostmortem()">📋 Copy</button>
-        <button class="btn-close-detail" onclick="closePostmortem()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-    <div class="pm-content"><div id="pm-body"></div></div>
-  </div>
-</div>
-
-<!-- Toast Notifications -->
-<div class="toast-container" id="toast-container"></div>
-
-<!-- Celebration Canvas -->
-<canvas id="confetti-canvas"></canvas>
-
-
-
-<!-- ── Settings Modal ──────────────────────────────────────────────────────── -->
-<div class="settings-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()" style="display:none">
-  <div class="settings-modal">
-
-    <div class="settings-header">
-      <div class="settings-header-left">
-        <span class="settings-icon">⚙️</span>
-        <div>
-          <div class="settings-title">Integrations &amp; Settings</div>
-          <div class="settings-subtitle">Configure KIRA — changes apply instantly, saved to .env</div>
+        <div class="hero-actions">
+          <button class="hero-cta-primary" onclick="checkHealthAndLaunch()">
+            Open Dashboard
+          </button>
+          <button class="hero-cta-ghost"
+            onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+            See how it works ↓
+          </button>
         </div>
-      </div>
-      <button class="btn-close-detail" onclick="closeSettings()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
 
-    <!-- Tab Bar -->
-    <div class="settings-tabs">
-      <button class="settings-tab active" data-tab="ollama" onclick="switchTab('ollama')">🦙 Ollama</button>
-      <button class="settings-tab" data-tab="kubernetes" onclick="switchTab('kubernetes')">⎈ Kubernetes</button>
-      <button class="settings-tab" data-tab="behaviour" onclick="switchTab('behaviour')">🎛️ Behaviour</button>
-      <button class="settings-tab" data-tab="jira" onclick="switchTab('jira')">🎫 Jira</button>
-      <button class="settings-tab" data-tab="teams" onclick="switchTab('teams')">💬 Teams</button>
-    </div>
-
-    <!-- Tab: Ollama -->
-    <div class="settings-pane active" id="tab-ollama">
-      <div class="settings-section-title">🦙 Ollama — Local LLM Runtime</div>
-      <div class="settings-hint">Ollama runs LLMs locally on your machine. <a href="https://ollama.com" target="_blank" rel="noopener">Install Ollama →</a></div>
-      <div class="settings-field">
-        <label class="settings-label">Base URL</label>
-        <input class="settings-input" id="s-ollama-url" type="text" placeholder="http://localhost:11434/v1" />
-        <span class="settings-field-hint">Ollama API endpoint. Default works for local install.</span>
-      </div>
-      <div class="settings-field">
-        <label class="settings-label">Model</label>
-        <div class="settings-input-row">
-          <select class="settings-select" id="s-ollama-model"></select>
-          <button class="btn-icon" onclick="loadOllamaModels()" title="Refresh models">🔄</button>
-        </div>
-        <span class="settings-field-hint">Pull a model first: <code>ollama pull llama3.2</code></span>
-      </div>
-    </div>
-
-    <!-- Tab: Kubernetes -->
-    <div class="settings-pane" id="tab-kubernetes">
-      <div class="settings-section-title">⎈ Kubernetes Cluster</div>
-      <div class="settings-hint">KIRA will scan and remediate workloads in the selected context.</div>
-      <div class="settings-field">
-        <label class="settings-label">Cluster Context</label>
-        <div class="settings-input-row">
-          <select class="settings-select" id="s-kube-context"></select>
-          <button class="btn-icon" onclick="loadKubeContexts()" title="Refresh contexts">🔄</button>
-        </div>
-        <span class="settings-field-hint">Run <code>kubectl config get-contexts</code> to see available contexts.</span>
-      </div>
-      <div class="settings-field">
-        <label class="settings-label">Default Namespace</label>
-        <input class="settings-input" id="s-namespace" type="text" placeholder="default" />
-        <span class="settings-field-hint">Namespace KIRA monitors. The /scan endpoint will discover all non-system namespaces automatically.</span>
-      </div>
-    </div>
-
-    <!-- Tab: Behaviour -->
-    <div class="settings-pane" id="tab-behaviour">
-      <div class="settings-section-title">🎛️ Remediation Behaviour</div>
-      <div class="settings-field">
-        <label class="settings-label">Approval Mode</label>
-        <div class="settings-toggle-row">
-          <label class="toggle-switch">
-            <input type="checkbox" id="s-approval-mode" />
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-label" id="s-approval-label">Require approval when confidence is low</span>
-        </div>
-        <span class="settings-field-hint">When ON: KIRA asks for your approval if confidence is below the threshold. When OFF: fully autonomous.</span>
-      </div>
-      <div class="settings-field">
-        <label class="settings-label">Auto-Approve Threshold: <strong id="threshold-display">90%</strong></label>
-        <input class="settings-range" id="s-threshold" type="range" min="0" max="100" value="90"
-               oninput="document.getElementById('threshold-display').textContent=this.value+'%'" />
-        <div class="settings-range-labels"><span>0% — Always ask</span><span>100% — Always auto-fix</span></div>
-        <span class="settings-field-hint">If LLM confidence ≥ this %, KIRA remediates automatically without asking.</span>
-      </div>
-    </div>
-
-    <!-- Tab: Jira -->
-    <div class="settings-pane" id="tab-jira">
-      <div class="settings-section-title">🎫 Jira Integration</div>
-      <div class="settings-hint">Automatically creates and closes Jira tickets for every incident.</div>
-      <div class="settings-field">
-        <label class="settings-label">Enable Jira</label>
-        <div class="settings-toggle-row">
-          <label class="toggle-switch">
-            <input type="checkbox" id="s-jira-enabled" onchange="toggleJiraFields()" />
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-label">Create and close Jira tickets automatically</span>
-        </div>
-      </div>
-      <div id="jira-fields">
-        <div class="settings-field">
-          <label class="settings-label">Jira Cloud URL</label>
-          <input class="settings-input" id="s-jira-url" type="url" placeholder="https://your-company.atlassian.net" />
-        </div>
-        <div class="settings-field">
-          <label class="settings-label">Email</label>
-          <input class="settings-input" id="s-jira-email" type="email" placeholder="you@company.com" />
-        </div>
-        <div class="settings-field">
-          <label class="settings-label">API Token</label>
-          <input class="settings-input" id="s-jira-token" type="password" placeholder="Your Jira API token" />
-          <span class="settings-field-hint">Generate at <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener">id.atlassian.com → API tokens →</a></span>
-        </div>
-        <div class="settings-field settings-two-col">
-          <div>
-            <label class="settings-label">Project Key</label>
-            <input class="settings-input" id="s-jira-project" type="text" placeholder="KS" />
-            <span class="settings-field-hint">e.g. OPS, INFRA, KS</span>
+        <!-- Live stats strip -->
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value" id="hs-active">—</span>
+            <span class="hero-stat-label">Active incidents</span>
           </div>
-          <div>
-            <label class="settings-label">Issue Type</label>
-            <select class="settings-select" id="s-jira-type">
-              <option>Task</option><option>Bug</option><option>Story</option><option>Incident</option>
-            </select>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value" id="hs-resolved">—</span>
+            <span class="hero-stat-label">Auto-resolved</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value" id="hs-mttr">—</span>
+            <span class="hero-stat-label">Avg MTTR</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value" id="hs-status" class="status-ok">—</span>
+            <span class="hero-stat-label">Cluster health</span>
           </div>
         </div>
-        <button class="btn-test" id="btn-test-jira" onclick="testJira()">🔌 Test Connection</button>
-        <span class="test-status" id="jira-test-status"></span>
       </div>
-    </div>
 
-    <!-- Tab: Teams -->
-    <div class="settings-pane" id="tab-teams">
-      <div class="settings-section-title">💬 Microsoft Teams</div>
-      <div class="settings-hint">Sends incident alerts and resolution summaries to a Teams channel.</div>
-      <div class="settings-field">
-        <label class="settings-label">Webhook URL</label>
-        <input class="settings-input" id="s-teams-url" type="url" placeholder="https://your-org.webhook.office.com/webhookb2/…" />
-        <span class="settings-field-hint">Teams → channel → ··· → Connectors → Incoming Webhook → Copy URL</span>
+      <!-- Hero visual: mini dashboard preview -->
+      <div class="hero-visual">
+        <div class="hero-card hero-card-incidents">
+          <div class="hc-header">
+            <span class="hc-dot hc-dot-amber"></span>
+            <span class="hc-title">Incidents</span>
+            <span class="hc-badge">Live</span>
+          </div>
+          <div class="hc-rows">
+            <div class="hc-row">
+              <span class="hc-row-icon hc-amber">▸</span>
+              <span class="hc-row-text">payment-svc CrashLoopBackOff</span>
+              <span class="hc-row-status hc-amber">Investigating</span>
+            </div>
+            <div class="hc-row">
+              <span class="hc-row-icon hc-green">✓</span>
+              <span class="hc-row-text">auth-api OOMKilled</span>
+              <span class="hc-row-status hc-green">Resolved</span>
+            </div>
+            <div class="hc-row">
+              <span class="hc-row-icon hc-blue">◎</span>
+              <span class="hc-row-text">nginx-ingress ImagePullBackOff</span>
+              <span class="hc-row-status hc-blue">RCA done</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-card hero-card-agents">
+          <div class="hc-header">
+            <span class="hc-dot hc-dot-green"></span>
+            <span class="hc-title">Agents</span>
+          </div>
+          <div class="hc-agents">
+            <div class="hc-agent"><span>🔧</span> SRE Agent</div>
+            <div class="hc-agent"><span>🔍</span> App Agent</div>
+            <div class="hc-agent"><span>🔒</span> Security Agent</div>
+            <div class="hc-agent"><span>⚖️</span> Judge Agent</div>
+          </div>
+        </div>
+
+        <div class="hero-card hero-card-terminal">
+          <div class="hc-header">
+            <span class="hc-dot hc-dot-red"></span>
+            <span class="hc-dot hc-dot-amber"></span>
+            <span class="hc-dot hc-dot-green"></span>
+          </div>
+          <div class="hc-code">
+            <span class="hc-muted">$</span> kira scan --namespace production<br />
+            <span class="hc-green">✓</span> Found 3 unhealthy pods<br />
+            <span class="hc-cyan">↗</span> Deploying War Room agents…<br />
+            <span class="hc-amber">⚡</span> Remediating payment-svc<br />
+            <span class="hc-green">✓</span> Incident resolved in 47s
+          </div>
+        </div>
       </div>
-      <button class="btn-test" id="btn-test-teams" onclick="testTeams()">🔌 Test Connection</button>
-      <span class="test-status" id="teams-test-status"></span>
-    </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="features-section">
+      <div class="section-inner">
+        <div class="section-label reveal">Features</div>
+        <h2 class="section-title reveal reveal-delay-1">Everything your SRE team needs,<br />handled automatically.</h2>
+        <div class="features-grid">
+          <div class="feature-card reveal reveal-delay-1">
+            <div class="feature-icon">🔍</div>
+            <h3>Intelligent Detection</h3>
+            <p>Continuously monitors pods, deployments, and services. Detects CrashLoopBackOff, OOMKilled,
+              ImagePullErrors, and more.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-2">
+            <div class="feature-icon">🤖</div>
+            <h3>Multi-Agent War Room</h3>
+            <p>Spins up specialized AI agents — SRE, App, Security, and Cost — that collaborate to find root cause in
+              seconds.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-3">
+            <div class="feature-icon">⚡</div>
+            <h3>Autonomous Remediation</h3>
+            <p>Applies fixes automatically when confidence is high. Asks for approval on complex changes with full
+              command preview.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-4">
+            <div class="feature-icon">📄</div>
+            <h3>Auto-Postmortems</h3>
+            <p>Generates detailed incident postmortems with root cause, timeline, and prevention steps. Exports to Jira
+              automatically.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-5">
+            <div class="feature-icon">🎫</div>
+            <h3>Jira Integration</h3>
+            <p>Creates, updates, and closes Jira tickets automatically throughout the incident lifecycle. Zero manual
+              work.</p>
+          </div>
+          <div class="feature-card reveal reveal-delay-6">
+            <div class="feature-icon">💬</div>
+            <h3>Sherlock AI Chat</h3>
+            <p>Ask natural language questions about any incident. Sherlock answers with context-aware insight from the
+              full investigation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="how-section">
+      <div class="section-inner">
+        <div class="section-label reveal">How it works</div>
+        <h2 class="section-title reveal reveal-delay-1">From alert to resolution,<br />fully automated.</h2>
+        <div class="how-steps">
+          <div class="how-step reveal reveal-delay-1">
+            <div class="how-step-num">01</div>
+            <div class="how-anim anim-detect">
+              <div class="nodes">
+                <div class="node"><div class="pod"></div><div class="pod"></div><div class="pod"></div><div class="pod"></div></div>
+                <div class="node"><div class="pod error"></div><div class="pod"></div><div class="pod"></div><div class="pod"></div></div>
+                <div class="node"><div class="pod"></div><div class="pod"></div><div class="pod"></div><div class="pod"></div></div>
+              </div>
+              <div class="scanner"></div>
+            </div>
+            <div class="how-step-body">
+              <h3>Detect</h3>
+              <p>KIRA scans your cluster every 30 seconds, identifying unhealthy workloads across all namespaces.</p>
+            </div>
+          </div>
+          <div class="how-step-arrow reveal reveal-delay-2">→</div>
+          <div class="how-step reveal reveal-delay-2">
+            <div class="how-step-num">02</div>
+            <div class="how-anim anim-investigate">
+              <div class="center-node">🧠</div>
+              <div class="agent-node agent-1"></div><div class="data-packet packet-1"></div>
+              <div class="agent-node agent-2"></div><div class="data-packet packet-2"></div>
+              <div class="agent-node agent-3"></div><div class="data-packet packet-3"></div>
+              <div class="agent-node agent-4"></div><div class="data-packet packet-4"></div>
+            </div>
+            <div class="how-step-body">
+              <h3>Investigate</h3>
+              <p>Four specialized AI agents convene in a War Room — pulling logs, metrics, events, and history.</p>
+            </div>
+          </div>
+          <div class="how-step-arrow reveal reveal-delay-3">→</div>
+          <div class="how-step reveal reveal-delay-3">
+            <div class="how-step-num">03</div>
+            <div class="how-anim anim-remediate">
+              <div class="pod-container">
+                <div class="bad-pod"></div>
+                <div class="good-pod"></div>
+              </div>
+              <div class="magic-wand">⚡</div>
+            </div>
+            <div class="how-step-body">
+              <h3>Remediate</h3>
+              <p>The Judge Agent picks the best fix. KIRA applies it autonomously or requests your approval.</p>
+            </div>
+          </div>
+          <div class="how-step-arrow reveal reveal-delay-4">→</div>
+          <div class="how-step reveal reveal-delay-4">
+            <div class="how-step-num">04</div>
+            <div class="how-anim anim-document">
+              <div class="doc-line w-full"></div>
+              <div class="doc-line w-3/4"></div>
+              <div class="doc-line w-1/2"></div>
+            </div>
+            <div class="how-step-body">
+              <h3>Document</h3>
+              <p>A postmortem is generated, Jira is updated, and Teams/Slack gets a resolution summary.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Agents section -->
+    <section id="agents" class="agents-section">
+      <div class="section-inner">
+        <div class="section-label reveal">Agents</div>
+        <h2 class="section-title reveal reveal-delay-1">A specialized team,<br />on call 24/7.</h2>
+        <div class="agents-cards">
+          <div class="agent-profile reveal reveal-delay-1">
+            <div class="agent-profile-icon">🔧</div>
+            <h3>SRE Agent</h3>
+            <p>Analyzes Kubernetes events, pod states, resource limits, and cluster health to identify
+              infrastructure-level root causes.</p>
+            <div class="agent-profile-tags">
+              <span>Pod analysis</span><span>Events</span><span>Resources</span>
+            </div>
+          </div>
+          <div class="agent-profile reveal reveal-delay-2">
+            <div class="agent-profile-icon">🔍</div>
+            <h3>App Agent</h3>
+            <p>Digs into application logs, error patterns, and dependency chains to find code and configuration-level
+              failures.</p>
+            <div class="agent-profile-tags">
+              <span>Log analysis</span><span>Error patterns</span><span>Dependencies</span>
+            </div>
+          </div>
+          <div class="agent-profile reveal reveal-delay-3">
+            <div class="agent-profile-icon">🔒</div>
+            <h3>Security Agent</h3>
+            <p>Checks for misconfigurations, RBAC issues, network policies, and potential security incidents alongside
+              the failure.</p>
+            <div class="agent-profile-tags">
+              <span>RBAC</span><span>Network policies</span><span>CVEs</span>
+            </div>
+          </div>
+          <div class="agent-profile reveal reveal-delay-4">
+            <div class="agent-profile-icon">⚖️</div>
+            <h3>Judge Agent</h3>
+            <p>Synthesizes all findings, assigns confidence scores, selects the optimal remediation, and writes the
+              postmortem.</p>
+            <div class="agent-profile-tags">
+              <span>Consensus</span><span>Confidence</span><span>Postmortem</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="section-inner cta-inner reveal">
+        <h2 class="cta-title">Your cluster is running.<br />Is it healing itself?</h2>
+        <p class="cta-sub">Open the KIRA dashboard to start monitoring your Kubernetes cluster with AI-powered
+          self-healing.</p>
+        <button class="hero-cta-primary reveal reveal-delay-1" onclick="checkHealthAndLaunch()">Open Dashboard →</button>
+      </div>
+    </section>
 
     <!-- Footer -->
-    <div class="settings-footer">
-      <span class="settings-save-status" id="settings-save-status"></span>
-      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveSettings()">💾 Save Changes</button>
+    <footer class="footer">
+      <div class="footer-inner reveal">
+        <div class="footer-logo">
+          <span class="nav-logo-icon">⎈</span>
+          <span>KIRA</span>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com" target="_blank">GitHub</a>
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+        </div>
+        <div class="footer-copy">Built with ❤️ for SRE Teams by Abhijeet</div>
+      </div>
+    </footer>
+
+  </div><!-- /landing-page -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+     DASHBOARD APP
+═══════════════════════════════════════════════════════════ -->
+  <div id="app-shell" class="app-shell" style="display:none">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-back-btn" onclick="showLanding()" title="Back to home">
+          ← Home
+        </button>
+        <div class="logo">
+          <div class="logo-icon-wrap" id="logo-icon-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </div>
+          <div class="logo-text-group">
+            <span class="logo-name">KIRA</span>
+            <span class="logo-tag">Self-Healing Kubernetes</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topbar-center">
+        <div class="topbar-stat-pill">
+          <span class="health-dot" id="health-dot"></span>
+          <span class="health-label" id="health-label">Checking…</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="topbar-k8s-badge">
+          <span class="k8s-icon">⎈</span>
+          <span class="k8s-label">Kubernetes</span>
+        </div>
+        <button class="btn btn-primary" id="trigger-btn">
+          <span class="trigger-bolt">⚡</span> Scan
+        </button>
+        <button class="btn btn-settings" id="settings-btn" onclick="openSettings()" title="Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          Settings
+        </button>
+      </div>
+    </header>
+
+    <!-- Metrics Bar -->
+    <div class="metrics-bar" id="metrics-bar">
+      <div class="metric-item">
+        <span class="metric-label">Active</span>
+        <span class="metric-value" id="m-active">—</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Resolved</span>
+        <span class="metric-value" id="m-resolved">—</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Failed</span>
+        <span class="metric-value" id="m-failed">—</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Total</span>
+        <span class="metric-value" id="m-total">—</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">MTTR</span>
+        <span class="metric-value" id="m-mttr">—</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Confidence</span>
+        <span class="metric-value" id="m-confidence">—</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">Auto-resolved</span>
+        <span class="metric-value" id="m-auto">—</span>
+      </div>
     </div>
 
-  </div>
-</div>
+    <!-- Layout -->
+    <div class="layout">
 
-<script src="app.js?v=37"></script>
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Incidents <span class="incident-count" id="incident-count">0</span></h2>
+        </div>
+        <div class="incident-list" id="incident-list"></div>
+      </aside>
+
+      <!-- Detail panel -->
+      <main class="detail">
+        <div class="detail-header" id="detail-header" style="display:none">
+          <div class="detail-title-row">
+            <span class="detail-title" id="detail-title">—</span>
+            <span id="detail-badge"></span>
+            <button class="btn-close-detail" onclick="deselectIncident()" title="Close">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <div class="detail-meta">
+            <span>📁 <span id="detail-ns">—</span></span>
+            <span>🔖 <span id="detail-id">—</span></span>
+            <span>🕐 <span id="detail-started">—</span></span>
+          </div>
+        </div>
+
+        <!-- Resolved / Failed banner -->
+        <div class="resolved-banner" id="resolved-banner">
+          <span id="banner-icon">✅</span>
+          <div>
+            <div id="banner-title">Resolved</div>
+            <div id="banner-sub"></div>
+          </div>
+          <button class="btn btn-ghost" id="btn-postmortem" style="display:none" onclick="generatePostmortem()">📄
+            Postmortem</button>
+        </div>
+
+        <!-- Approval banner -->
+        <div class="approval-banner" id="approval-banner">
+          <div class="approval-top-row">
+            <div class="approval-body" id="approval-body"></div>
+            <div class="approval-actions">
+              <button class="btn btn-success" id="btn-approve">✅ Approve &amp; Apply</button>
+              <button class="btn btn-danger" id="btn-skip">✗ Skip</button>
+            </div>
+          </div>
+          <div class="approval-command" id="approval-command" style="display:none"></div>
+        </div>
+
+        <!-- Scrollable content -->
+        <div class="detail-content" id="detail-content">
+          <div class="timeline-empty" id="timeline-empty">
+            <div class="timeline-empty-icon">🕵️</div>
+            <div>
+              Select an incident from the sidebar<br />
+              to view the live investigation.
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat FAB -->
+        <button class="chat-fab" id="chat-fab" style="display:none" onclick="openChat()">
+          <span class="chat-fab-pulse"></span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span>Ask Sherlock</span>
+        </button>
+      </main>
+    </div><!-- /layout -->
+
+  </div><!-- /app-shell -->
+
+  <!-- ── Chat Drawer -->
+  <div class="chat-backdrop" id="chat-backdrop" onclick="closeChat()"></div>
+  <div class="chat-drawer" id="chat-drawer">
+    <div class="chat-drawer-header">
+      <div class="chat-avatar-wrap">
+        <div class="chat-avatar">🔍</div>
+        <span class="chat-avatar-dot"></span>
+      </div>
+      <div class="chat-drawer-meta">
+        <div class="chat-drawer-name">Sherlock AI</div>
+        <div class="chat-drawer-sub">Incident Intelligence Assistant</div>
+      </div>
+      <button class="btn-close-detail" onclick="closeChat()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-area">
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" type="text" placeholder="Ask anything about this incident…"
+          onkeydown="if(event.key==='Enter')sendChat()" />
+        <button class="chat-voice-btn" id="chat-voice-btn" onclick="toggleVoice()" title="Voice input">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+        </button>
+        <button class="chat-send-btn" id="chat-send-btn" onclick="sendChat()" title="Send">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Postmortem overlay -->
+  <div class="pm-overlay" id="pm-overlay" style="display:none" onclick="if(event.target===this)closePostmortem()">
+    <div class="pm-modal">
+      <div class="pm-modal-header">
+        <span class="pm-modal-title">📄 Incident Postmortem</span>
+        <div class="pm-modal-actions">
+          <button class="btn btn-ghost" id="pm-copy-btn" onclick="copyPostmortem()">📋 Copy</button>
+          <button class="btn-close-detail" onclick="closePostmortem()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="pm-content">
+        <div id="pm-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Celebration Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- ── Profile Modal -->
+  <div class="settings-overlay" id="profile-overlay" onclick="if(event.target===this)closeProfileModal()" style="display:none">
+    <div class="settings-modal" style="max-width: 500px; padding: 40px; text-align: center;">
+      <button class="btn-close-detail" onclick="closeProfileModal()" style="position: absolute; top: 16px; right: 16px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      
+      <img src="images/abhijeet.jpg" alt="Abhijeet Dhengale" class="creator-img" style="margin: 0 auto 24px auto;" />
+      
+      <h3 style="color: var(--text-1); font-size: 24px; margin-bottom: 8px;">Abhijeet Dhengale</h3>
+      <div class="creator-role" style="justify-content: center;">DevOps & Site Reliability Engineer</div>
+      
+      <p class="creator-bio" style="font-size: 14px;">
+        Passionate about cloud-native infrastructure, automation, Kubernetes, and building reliable, scalable platforms through Infrastructure as Code and CI/CD. Open to collaborating on DevOps, SRE, platform engineering, and cloud automation projects.
+      </p>
+      
+      <div class="creator-links" style="justify-content: center;">
+        <span class="creator-cert">⎈ CKA Certified</span>
+        <a href="https://www.linkedin.com/in/abhijeet-dhengale-56630160/" target="_blank" class="creator-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+        </a>
+        <a href="https://github.com/AbhijeetTD" target="_blank" class="creator-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Settings Modal -->
+  <div class="settings-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()"
+    style="display:none">
+    <div class="settings-modal">
+
+      <div class="settings-header">
+        <div class="settings-header-left">
+          <span class="settings-icon">⚙️</span>
+          <div>
+            <div class="settings-title">Integrations &amp; Settings</div>
+            <div class="settings-subtitle">Configure KIRA — changes apply instantly, saved to .env</div>
+          </div>
+        </div>
+        <button class="btn-close-detail" onclick="closeSettings()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-tab="ollama" onclick="switchTab('ollama')">🦙 Ollama</button>
+        <button class="settings-tab" data-tab="kubernetes" onclick="switchTab('kubernetes')">⎈ Kubernetes</button>
+        <button class="settings-tab" data-tab="behaviour" onclick="switchTab('behaviour')">🎛️ Behaviour</button>
+        <button class="settings-tab" data-tab="jira" onclick="switchTab('jira')">🎫 Jira</button>
+        <button class="settings-tab" data-tab="teams" onclick="switchTab('teams')">💬 Teams</button>
+      </div>
+
+      <div class="settings-pane active" id="tab-ollama">
+        <div class="settings-section-title">🦙 Ollama — Local LLM Runtime</div>
+        <div class="settings-hint">Ollama runs LLMs locally on your machine. <a href="https://ollama.com"
+            target="_blank" rel="noopener">Install Ollama →</a></div>
+        <div class="settings-field">
+          <label class="settings-label">Base URL</label>
+          <input class="settings-input" id="s-ollama-url" type="text" placeholder="http://localhost:11434/v1" />
+          <span class="settings-field-hint">Ollama API endpoint. Default works for local install.</span>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Model</label>
+          <div class="settings-input-row">
+            <select class="settings-select" id="s-ollama-model"></select>
+            <button class="btn-icon" onclick="loadOllamaModels()" title="Refresh models">🔄</button>
+          </div>
+          <span class="settings-field-hint">Pull a model first: <code>ollama pull llama3.2</code></span>
+        </div>
+      </div>
+
+      <div class="settings-pane" id="tab-kubernetes">
+        <div class="settings-section-title">⎈ Kubernetes Cluster</div>
+        <div class="settings-hint">KIRA will scan and remediate workloads in the selected context.</div>
+        <div class="settings-field">
+          <label class="settings-label">Cluster Context</label>
+          <div class="settings-input-row">
+            <select class="settings-select" id="s-kube-context"></select>
+            <button class="btn-icon" onclick="loadKubeContexts()" title="Refresh contexts">🔄</button>
+          </div>
+          <span class="settings-field-hint">Run <code>kubectl config get-contexts</code> to see available
+            contexts.</span>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Default Namespace</label>
+          <input class="settings-input" id="s-namespace" type="text" placeholder="default" />
+          <span class="settings-field-hint">Namespace KIRA monitors.</span>
+        </div>
+      </div>
+
+      <div class="settings-pane" id="tab-behaviour">
+        <div class="settings-section-title">🎛️ Remediation Behaviour</div>
+        <div class="settings-field">
+          <label class="settings-label">Approval Mode</label>
+          <div class="settings-toggle-row">
+            <label class="toggle-switch">
+              <input type="checkbox" id="s-approval-mode" />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label" id="s-approval-label">Require approval when confidence is low</span>
+          </div>
+          <span class="settings-field-hint">When ON: KIRA asks for your approval if confidence is below the threshold.
+            When OFF: fully autonomous.</span>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Auto-Approve Threshold: <strong id="threshold-display">90%</strong></label>
+          <input class="settings-range" id="s-threshold" type="range" min="0" max="100" value="90"
+            oninput="document.getElementById('threshold-display').textContent=this.value+'%'" />
+          <div class="settings-range-labels"><span>0% — Always ask</span><span>100% — Always auto-fix</span></div>
+          <span class="settings-field-hint">If LLM confidence ≥ this %, KIRA remediates automatically without
+            asking.</span>
+        </div>
+      </div>
+
+      <div class="settings-pane" id="tab-jira">
+        <div class="settings-section-title">🎫 Jira Integration</div>
+        <div class="settings-hint">Automatically creates and closes Jira tickets for every incident.</div>
+        <div class="settings-field">
+          <label class="settings-label">Enable Jira</label>
+          <div class="settings-toggle-row">
+            <label class="toggle-switch">
+              <input type="checkbox" id="s-jira-enabled" onchange="toggleJiraFields()" />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">Create and close Jira tickets automatically</span>
+          </div>
+        </div>
+        <div id="jira-fields">
+          <div class="settings-field">
+            <label class="settings-label">Jira Cloud URL</label>
+            <input class="settings-input" id="s-jira-url" type="url" placeholder="https://your-company.atlassian.net" />
+          </div>
+          <div class="settings-field">
+            <label class="settings-label">Email</label>
+            <input class="settings-input" id="s-jira-email" type="email" placeholder="you@company.com" />
+          </div>
+          <div class="settings-field">
+            <label class="settings-label">API Token</label>
+            <input class="settings-input" id="s-jira-token" type="password" placeholder="Your Jira API token" />
+            <span class="settings-field-hint">Generate at <a
+                href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank"
+                rel="noopener">id.atlassian.com → API tokens →</a></span>
+          </div>
+          <div class="settings-field settings-two-col">
+            <div>
+              <label class="settings-label">Project Key</label>
+              <input class="settings-input" id="s-jira-project" type="text" placeholder="KS" />
+              <span class="settings-field-hint">e.g. OPS, INFRA, KS</span>
+            </div>
+            <div>
+              <label class="settings-label">Issue Type</label>
+              <select class="settings-select" id="s-jira-type">
+                <option>Task</option>
+                <option>Bug</option>
+                <option>Story</option>
+                <option>Incident</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-test" id="btn-test-jira" onclick="testJira()">🔌 Test Connection</button>
+          <span class="test-status" id="jira-test-status"></span>
+        </div>
+      </div>
+
+      <div class="settings-pane" id="tab-teams">
+        <div class="settings-section-title">💬 Microsoft Teams</div>
+        <div class="settings-hint">Sends incident alerts and resolution summaries to a Teams channel.</div>
+        <div class="settings-field">
+          <label class="settings-label">Webhook URL</label>
+          <input class="settings-input" id="s-teams-url" type="url"
+            placeholder="https://your-org.webhook.office.com/webhookb2/…" />
+          <span class="settings-field-hint">Teams → channel → ··· → Connectors → Incoming Webhook → Copy URL</span>
+        </div>
+        <button class="btn-test" id="btn-test-teams" onclick="testTeams()">🔌 Test Connection</button>
+        <span class="test-status" id="teams-test-status"></span>
+      </div>
+
+      <div class="settings-footer">
+        <span class="settings-save-status" id="settings-save-status"></span>
+        <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Save Changes</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js?v=38"></script>
+  
+  <script>
+    // Scroll Reveal Observer
+    document.addEventListener("DOMContentLoaded", () => {
+      const observerOptions = {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.15
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("active");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll(".reveal").forEach(el => {
+        observer.observe(el);
+      });
+    });
+  </script>
+  <script>
+    // ── Profile Modal
+    function openProfileModal() {
+      document.getElementById('profile-overlay').style.display = 'flex';
+    }
+    function closeProfileModal() {
+      document.getElementById('profile-overlay').style.display = 'none';
+    }
+
+    // ── Landing ↔ Dashboard navigation
+    function showLanding() {
+      document.getElementById('landing-page').style.display = '';
+      document.getElementById('app-shell').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function showDashboard() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('app-shell').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    async function checkHealthAndLaunch() {
+      showDashboard();
+    }
+
+    // Deselect/close active incident
+    function deselectIncident() {
+      if (typeof activeSSE !== 'undefined' && activeSSE) { activeSSE.close(); activeSSE = null; }
+      activeIncidentId = null;
+      const h = document.getElementById('detail-header');
+      if (h) h.style.display = 'none';
+      const rb = document.getElementById('resolved-banner');
+      if (rb) { rb.classList.remove('visible', 'resolved', 'failed'); }
+      const ab = document.getElementById('approval-banner');
+      if (ab) ab.classList.remove('visible');
+      const dc = document.getElementById('detail-content');
+      if (dc) {
+        dc.innerHTML = '';
+        const empty = document.getElementById('timeline-empty');
+        if (empty) { dc.appendChild(empty); empty.style.display = ''; }
+      }
+      const fab = document.getElementById('chat-fab');
+      if (fab) fab.style.display = 'none';
+      document.querySelectorAll('.incident-card').forEach(c => c.classList.remove('active'));
+    }
+
+    // Keyboard shortcut — Escape closes panels
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (document.getElementById('settings-overlay')?.style.display !== 'none') { closeSettings?.(); return; }
+        if (document.getElementById('pm-overlay')?.style.display !== 'none') { closePostmortem?.(); return; }
+        if (document.getElementById('chat-drawer')?.classList.contains('open')) { closeChat?.(); return; }
+        if (document.getElementById('app-shell')?.style.display !== 'none' && activeIncidentId) { deselectIncident(); }
+      }
+    });
+
+    // Update hero stats from /incidents (no separate /metrics endpoint exists)
+    async function updateHeroStats() {
+      try {
+        const r = await fetch('/incidents');
+        if (!r.ok) return;
+        const list = await r.json();
+        const TERMINAL = new Set(['resolved', 'failed', 'skipped']);
+        const active = list.filter(i => !TERMINAL.has(i.status)).length;
+        const resolved = list.filter(i => i.status === 'resolved').length;
+        const withTime = list.filter(i => i.status === 'resolved' && i.total_time_seconds != null);
+        const mttr = withTime.length
+          ? Math.round(withTime.reduce((s, i) => s + i.total_time_seconds, 0) / withTime.length)
+          : null;
+
+        const el = id => document.getElementById(id);
+        if (el('hs-active')) el('hs-active').textContent = active;
+        if (el('hs-resolved')) el('hs-resolved').textContent = resolved;
+        if (el('hs-mttr')) el('hs-mttr').textContent = mttr != null ? mttr + 's' : '—';
+        if (el('hs-status')) el('hs-status').textContent = active === 0 ? 'Healthy ✓' : active + ' active';
+      } catch (e) { /* silently ignore when on dashboard */ }
+    }
+    updateHeroStats();
+    setInterval(updateHeroStats, 15000);
+  </script>
 </body>
+
 </html>
