@@ -72,7 +72,7 @@
             Open Dashboard
           </button>
           <button class="hero-cta-ghost"
-            onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+            onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
             See how it works ↓
           </button>
         </div>
@@ -165,40 +165,63 @@
         <h2 class="section-title reveal reveal-delay-1">Everything your SRE team needs,<br />handled automatically.</h2>
         <div class="features-grid">
           <div class="feature-card reveal reveal-delay-1">
-            <div class="feature-icon">🔍</div>
+            <div class="feature-anim fa-detect">
+              <div class="fa-grid">
+                <div class="fa-dot"></div><div class="fa-dot alert"></div><div class="fa-dot"></div>
+                <div class="fa-dot"></div><div class="fa-dot"></div><div class="fa-dot"></div>
+              </div>
+              <div class="fa-radar"></div>
+            </div>
             <h3>Intelligent Detection</h3>
             <p>Continuously monitors pods, deployments, and services. Detects CrashLoopBackOff, OOMKilled,
               ImagePullErrors, and more.</p>
           </div>
           <div class="feature-card reveal reveal-delay-2">
-            <div class="feature-icon">🤖</div>
+            <div class="feature-anim fa-agents">
+              <div class="fa-hub"></div>
+              <div class="fa-bot b1"></div>
+              <div class="fa-bot b2"></div>
+            </div>
             <h3>Multi-Agent War Room</h3>
             <p>Spins up specialized AI agents — SRE, App, Security, and Cost — that collaborate to find root cause in
               seconds.</p>
           </div>
           <div class="feature-card reveal reveal-delay-3">
-            <div class="feature-icon">⚡</div>
+            <div class="feature-anim fa-remediate">
+              <div class="fa-box-bad"></div>
+              <div class="fa-beam"></div>
+              <div class="fa-box-good"></div>
+            </div>
             <h3>Autonomous Remediation</h3>
             <p>Applies fixes automatically when confidence is high. Asks for approval on complex changes with full
               command preview.</p>
           </div>
           <div class="feature-card reveal reveal-delay-4">
-            <div class="feature-icon">📄</div>
+            <div class="feature-anim fa-doc">
+              <div class="fa-line"></div>
+              <div class="fa-line"></div>
+              <div class="fa-line"></div>
+            </div>
             <h3>Auto-Postmortems</h3>
             <p>Generates detailed incident postmortems with root cause, timeline, and prevention steps. Exports to Jira
               automatically.</p>
           </div>
           <div class="feature-card reveal reveal-delay-5">
-            <div class="feature-icon">🎫</div>
+            <div class="feature-anim fa-jira">
+              <div class="fa-ticket"></div>
+            </div>
             <h3>Jira Integration</h3>
             <p>Creates, updates, and closes Jira tickets automatically throughout the incident lifecycle. Zero manual
               work.</p>
           </div>
           <div class="feature-card reveal reveal-delay-6">
-            <div class="feature-icon">💬</div>
+            <div class="feature-anim fa-chat">
+              <div class="fa-bubble"></div>
+              <div class="fa-bubble reply"></div>
+            </div>
             <h3>Sherlock AI Chat</h3>
-            <p>Ask natural language questions about any incident. Sherlock answers with context-aware insight from the
-              full investigation.</p>
+            <p>Chat directly with the cluster. Ask "Why did production go down yesterday?" and get instant, context-aware
+              answers.</p>
           </div>
         </div>
       </div>
@@ -279,7 +302,13 @@
         <h2 class="section-title reveal reveal-delay-1">A specialized team,<br />on call 24/7.</h2>
         <div class="agents-cards">
           <div class="agent-profile reveal reveal-delay-1">
-            <div class="agent-profile-icon">🔧</div>
+            <div class="agent-anim ag-sre">
+              <div class="ag-rack">
+                <div class="ag-server"><div class="ag-light"></div></div>
+                <div class="ag-server"><div class="ag-light alert"></div></div>
+                <div class="ag-server"><div class="ag-light"></div></div>
+              </div>
+            </div>
             <h3>SRE Agent</h3>
             <p>Analyzes Kubernetes events, pod states, resource limits, and cluster health to identify
               infrastructure-level root causes.</p>
@@ -288,7 +317,13 @@
             </div>
           </div>
           <div class="agent-profile reveal reveal-delay-2">
-            <div class="agent-profile-icon">🔍</div>
+            <div class="agent-anim ag-app">
+              <div class="ag-window">
+                <div class="ag-line"></div>
+                <div class="ag-line w-half"></div>
+                <div class="ag-line error"></div>
+              </div>
+            </div>
             <h3>App Agent</h3>
             <p>Digs into application logs, error patterns, and dependency chains to find code and configuration-level
               failures.</p>
@@ -297,7 +332,11 @@
             </div>
           </div>
           <div class="agent-profile reveal reveal-delay-3">
-            <div class="agent-profile-icon">🔒</div>
+            <div class="agent-anim ag-sec">
+              <div class="ag-shield">
+                <div class="ag-scanline"></div>
+              </div>
+            </div>
             <h3>Security Agent</h3>
             <p>Checks for misconfigurations, RBAC issues, network policies, and potential security incidents alongside
               the failure.</p>
@@ -306,7 +345,15 @@
             </div>
           </div>
           <div class="agent-profile reveal reveal-delay-4">
-            <div class="agent-profile-icon">⚖️</div>
+            <div class="agent-anim ag-judge">
+              <div class="ag-tree">
+                <div class="ag-link l1"></div>
+                <div class="ag-link l2"></div>
+                <div class="ag-node top"></div>
+                <div class="ag-node left"></div>
+                <div class="ag-node right"></div>
+              </div>
+            </div>
             <h3>Judge Agent</h3>
             <p>Synthesizes all findings, assigns confidence scores, selects the optimal remediation, and writes the
               postmortem.</p>
@@ -352,99 +399,100 @@
 ═══════════════════════════════════════════════════════════ -->
   <div id="app-shell" class="app-shell" style="display:none">
 
-    <!-- Top bar -->
-    <header class="topbar">
-      <div class="topbar-left">
-        <button class="topbar-back-btn" onclick="showLanding()" title="Back to home">
-          ← Home
-        </button>
-        <div class="logo">
-          <div class="logo-icon-wrap" id="logo-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </div>
-          <div class="logo-text-group">
-            <span class="logo-name">KIRA</span>
-            <span class="logo-tag">Self-Healing Kubernetes</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="topbar-center">
-        <div class="topbar-stat-pill">
-          <span class="health-dot" id="health-dot"></span>
-          <span class="health-label" id="health-label">Checking…</span>
-        </div>
-      </div>
-
-      <div class="topbar-right">
-        <div class="topbar-k8s-badge">
-          <span class="k8s-icon">⎈</span>
-          <span class="k8s-label">Kubernetes</span>
-        </div>
-        <button class="btn btn-primary" id="trigger-btn">
-          <span class="trigger-bolt">⚡</span> Scan
-        </button>
-        <button class="btn btn-settings" id="settings-btn" onclick="openSettings()" title="Settings">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-          Settings
-        </button>
-      </div>
-    </header>
-
-    <!-- Metrics Bar -->
-    <div class="metrics-bar" id="metrics-bar">
-      <div class="metric-item">
-        <span class="metric-label">Active</span>
-        <span class="metric-value" id="m-active">—</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">Resolved</span>
-        <span class="metric-value" id="m-resolved">—</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">Failed</span>
-        <span class="metric-value" id="m-failed">—</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">Total</span>
-        <span class="metric-value" id="m-total">—</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">MTTR</span>
-        <span class="metric-value" id="m-mttr">—</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">Confidence</span>
-        <span class="metric-value" id="m-confidence">—</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">Auto-resolved</span>
-        <span class="metric-value" id="m-auto">—</span>
-      </div>
-    </div>
-
-    <!-- Layout -->
+    <!-- Layout (Full height) -->
     <div class="layout">
 
       <!-- Sidebar -->
       <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="logo">
+            <div class="logo-icon-wrap" id="logo-icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </div>
+            <div class="logo-text-group">
+              <span class="logo-name">KIRA</span>
+              <span class="logo-tag">Workspace</span>
+            </div>
+          </div>
+        </div>
         <div class="sidebar-header">
           <h2>Incidents <span class="incident-count" id="incident-count">0</span></h2>
         </div>
         <div class="incident-list" id="incident-list"></div>
       </aside>
 
-      <!-- Detail panel -->
+      <!-- Main Content Area -->
       <main class="detail">
+        
+        <!-- Top bar (Inside main area now) -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="topbar-back-btn" onclick="showLanding()" title="Back to home">
+              ← Home
+            </button>
+          </div>
+
+          <div class="topbar-center">
+            <div class="topbar-stat-pill">
+              <span class="health-dot" id="health-dot"></span>
+              <span class="health-label" id="health-label">Checking…</span>
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <div class="topbar-k8s-badge">
+              <span class="k8s-icon">⎈</span>
+              <span class="k8s-label">Kubernetes</span>
+            </div>
+            <button class="btn btn-primary" id="trigger-btn">
+              <span class="trigger-bolt">⚡</span> Scan
+            </button>
+            <button class="btn btn-settings" id="settings-btn" onclick="openSettings()" title="Settings">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+              Settings
+            </button>
+          </div>
+        </header>
+
+        <!-- Floating Metrics Bar -->
+        <div class="metrics-bar" id="metrics-bar">
+          <div class="metric-item">
+            <span class="metric-label">Active</span>
+            <span class="metric-value" id="m-active">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Resolved</span>
+            <span class="metric-value" id="m-resolved">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Failed</span>
+            <span class="metric-value" id="m-failed">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Total</span>
+            <span class="metric-value" id="m-total">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">MTTR</span>
+            <span class="metric-value" id="m-mttr">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Confidence</span>
+            <span class="metric-value" id="m-confidence">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Auto-resolved</span>
+            <span class="metric-value" id="m-auto">—</span>
+          </div>
+        </div>
+
+        <main class="detail-inner" style="flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative;">
         <div class="detail-header" id="detail-header" style="display:none">
           <div class="detail-title-row">
             <span class="detail-title" id="detail-title">—</span>
@@ -488,11 +536,51 @@
 
         <!-- Scrollable content -->
         <div class="detail-content" id="detail-content">
-          <div class="timeline-empty" id="timeline-empty">
-            <div class="timeline-empty-icon">🕵️</div>
-            <div>
-              Select an incident from the sidebar<br />
-              to view the live investigation.
+          <div class="health-overview" id="timeline-empty">
+            <h2 class="ho-title">Cluster Health Overview</h2>
+            <p class="ho-sub">Monitoring infrastructure, applications, and security.</p>
+            
+            <div class="ho-grid">
+              <div class="ho-card">
+                <div class="agent-anim ag-sre" style="margin-bottom:12px; width:48px; height:48px;">
+                  <div class="ag-rack" style="transform:scale(0.8);">
+                    <div class="ag-server"><div class="ag-light"></div></div>
+                    <div class="ag-server"><div class="ag-light"></div></div>
+                    <div class="ag-server"><div class="ag-light"></div></div>
+                  </div>
+                </div>
+                <h3>SRE Agent</h3>
+                <div class="ho-status ok"><span class="pulse-dot"></span> All Systems Nominal</div>
+              </div>
+              <div class="ho-card">
+                <div class="agent-anim ag-app" style="margin-bottom:12px; width:48px; height:48px;">
+                  <div class="ag-window" style="transform:scale(0.8);">
+                    <div class="ag-line"></div>
+                    <div class="ag-line w-half"></div>
+                  </div>
+                </div>
+                <h3>App Agent</h3>
+                <div class="ho-status ok"><span class="pulse-dot"></span> No Error Spikes</div>
+              </div>
+              <div class="ho-card">
+                <div class="agent-anim ag-sec" style="margin-bottom:12px; width:48px; height:48px;">
+                  <div class="ag-shield" style="transform:scale(0.8);">
+                    <div class="ag-scanline"></div>
+                  </div>
+                </div>
+                <h3>Security Agent</h3>
+                <div class="ho-status ok"><span class="pulse-dot"></span> Zero Active Threats</div>
+              </div>
+              <div class="ho-card">
+                <div class="agent-anim ag-judge" style="margin-bottom:12px; width:48px; height:48px;">
+                  <div class="ag-tree" style="transform:scale(0.8);">
+                    <div class="ag-link l1"></div><div class="ag-link l2"></div>
+                    <div class="ag-node top"></div><div class="ag-node left"></div><div class="ag-node right"></div>
+                  </div>
+                </div>
+                <h3>Judge Agent</h3>
+                <div class="ho-status ok"><span class="pulse-dot"></span> Standing By</div>
+              </div>
             </div>
           </div>
         </div>
@@ -505,6 +593,7 @@
           </svg>
           <span>Ask Sherlock</span>
         </button>
+        </main> <!-- /detail-inner -->
       </main>
     </div><!-- /layout -->
 

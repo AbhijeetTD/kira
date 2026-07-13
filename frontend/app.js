@@ -204,8 +204,14 @@ async function loadIncidents() {
 
     if (!list.length) {
       elList.innerHTML = `<div class="timeline-empty" style="padding:32px 0">
-        <div class="timeline-empty-icon">📭</div>
-        <div>No incidents yet.<br/>Trigger one to get started.</div></div>`;
+        <div class="empty-state-anim">
+          <div class="es-ring r1"></div>
+          <div class="es-ring r2"></div>
+          <div class="es-logo">⎈</div>
+        </div>
+        <div class="empty-state-text">No incidents yet.</div>
+        <div class="empty-state-sub">Trigger one to get started.</div>
+      </div>`;
       return;
     }
 
