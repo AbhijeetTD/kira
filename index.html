@@ -1,10 +1,324 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Kira Ops</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KiraOps | AI Kubernetes SRE Agent</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Inter',sans-serif;
+}
+
+body{
+
+background:
+radial-gradient(circle at top,#0d1b3b,#060816 55%,#03050c);
+
+color:white;
+overflow:hidden;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+
+}
+
+body:before{
+
+content:"";
+position:absolute;
+width:200%;
+height:200%;
+background-image:
+radial-gradient(#1da1ff 1px,transparent 1px);
+
+background-size:60px 60px;
+
+opacity:.12;
+
+animation:move 50s linear infinite;
+
+}
+
+@keyframes move{
+
+from{transform:translateY(0);}
+to{transform:translateY(-500px);}
+
+}
+
+.card{
+
+position:relative;
+z-index:5;
+
+width:90%;
+max-width:900px;
+
+padding:70px;
+
+text-align:center;
+
+border-radius:24px;
+
+background:rgba(255,255,255,.04);
+
+backdrop-filter:blur(18px);
+
+border:1px solid rgba(255,255,255,.08);
+
+box-shadow:0 0 80px rgba(0,170,255,.15);
+
+}
+
+.logo{
+
+font-size:65px;
+
+margin-bottom:15px;
+
+}
+
+h1{
+
+font-size:58px;
+
+font-weight:800;
+
+letter-spacing:2px;
+
+margin-bottom:15px;
+
+}
+
+.blue{
+
+color:#38bdf8;
+
+}
+
+.tagline{
+
+font-size:22px;
+
+opacity:.92;
+
+margin-bottom:40px;
+
+line-height:1.6;
+
+}
+
+.badge{
+
+display:inline-block;
+
+padding:12px 24px;
+
+border-radius:50px;
+
+background:#0ea5e9;
+
+font-weight:700;
+
+margin-bottom:35px;
+
+}
+
+.features{
+
+display:flex;
+
+justify-content:center;
+
+flex-wrap:wrap;
+
+gap:15px;
+
+margin-bottom:45px;
+
+}
+
+.feature{
+
+padding:12px 22px;
+
+background:rgba(255,255,255,.05);
+
+border:1px solid rgba(255,255,255,.08);
+
+border-radius:40px;
+
+font-size:15px;
+
+}
+
+.coming{
+
+font-size:42px;
+
+font-weight:800;
+
+margin-bottom:15px;
+
+}
+
+.subtitle{
+
+font-size:18px;
+
+opacity:.75;
+
+line-height:1.7;
+
+max-width:650px;
+
+margin:auto;
+
+}
+
+.footer{
+
+margin-top:50px;
+
+font-size:14px;
+
+opacity:.55;
+
+letter-spacing:1px;
+
+}
+
+.cursor{
+
+display:inline-block;
+
+width:12px;
+
+height:28px;
+
+background:#38bdf8;
+
+margin-left:4px;
+
+animation:blink .8s infinite;
+
+}
+
+@keyframes blink{
+
+50%{opacity:0;}
+
+}
+
+@media(max-width:700px){
+
+.card{
+
+padding:40px 25px;
+
+}
+
+h1{
+
+font-size:42px;
+
+}
+
+.tagline{
+
+font-size:18px;
+
+}
+
+.coming{
+
+font-size:30px;
+
+}
+
+.logo{
+
+font-size:50px;
+
+}
+
+}
+
+</style>
+
 </head>
+
 <body>
-    <h1>Welcome to Kira Ops</h1>
-    <p>Your AI SRE Agent for Kubernetes.</p>
+
+<div class="card">
+
+<div class="logo">🤖☸️</div>
+
+<h1>Kira<span class="blue">Ops</span></h1>
+
+<div class="tagline">
+
+AI-Powered Kubernetes SRE Agent
+
+<br>
+
+Automating Cloud Operations • Incident Response • DevOps Intelligence
+
+</div>
+
+<div class="badge">
+
+🚀 COMING SOON
+
+</div>
+
+<div class="features">
+
+<div class="feature">Kubernetes</div>
+
+<div class="feature">AI Incident Analysis</div>
+
+<div class="feature">Root Cause Detection</div>
+
+<div class="feature">EKS / AKS / GKE</div>
+
+<div class="feature">Observability</div>
+
+<div class="feature">Cloud Automation</div>
+
+<div class="feature">SRE Assistant</div>
+
+</div>
+
+<div class="coming">
+
+Stay Tuned<span class="cursor"></span>
+
+</div>
+
+<div class="subtitle">
+
+KiraOps is an intelligent Kubernetes SRE platform designed to help engineers diagnose incidents, automate troubleshooting, monitor clusters, and simplify cloud-native operations using AI.
+
+</div>
+
+<div class="footer">
+
+© 2026 KiraOps • Built with ❤️ for DevOps & SRE Engineers
+
+</div>
+
+</div>
+
 </body>
+
 </html>
