@@ -3,322 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>KiraOps | AI Kubernetes SRE Agent</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
+<title>KiraOps | AI SRE Agent for Kubernetes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Inter',sans-serif;
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:#07101f;color:#fff;overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;inset:-20%;filter:blur(90px);z-index:-2}
+body:before{background:radial-gradient(circle,#00c6ff55,transparent 50%);animation:f1 12s infinite alternate}
+body:after{background:radial-gradient(circle,#6a5cff55,transparent 45%);animation:f2 15s infinite alternate}
+@keyframes f1{to{transform:translate(20%,15%)}}
+@keyframes f2{to{transform:translate(-15%,20%)}}
+.grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(circle,black 40%,transparent 95%);z-index:-1}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px}
+.wrap{max-width:1200px;width:100%;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+.logo{width:180px;margin-bottom:20px;filter:drop-shadow(0 0 25px #3cbcff)}
+h1{font-size:72px;font-weight:800}
+h1 span{background:linear-gradient(90deg,#00c6ff,#7a5cff);-webkit-background-clip:text;color:transparent}
+p.lead{font-size:24px;color:#b9d3ff;margin:20px 0}
+.badge{display:inline-block;padding:12px 22px;border:1px solid #2ca8ff;border-radius:999px;background:#0c223d}
+.buttons{margin:30px 0;display:flex;gap:15px;flex-wrap:wrap}
+.btn{padding:14px 24px;border-radius:10px;text-decoration:none;font-weight:700}
+.primary{background:linear-gradient(90deg,#00c6ff,#5b7cff);color:white}
+.secondary{border:1px solid #2ca8ff;color:#bde6ff}
+.features{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:25px}
+.card{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);padding:18px;border:1px solid rgba(255,255,255,.08);border-radius:16px}
+.panel{background:#091426;border:1px solid #223a5d;border-radius:18px;padding:25px;box-shadow:0 0 40px rgba(0,180,255,.15)}
+.term{font-family:"JetBrains Mono",monospace;color:#6ef5b6;white-space:pre-line;font-size:15px}
+.metric{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #20324d}
+.footer{text-align:center;padding:30px;color:#8ca4c7}
+.small{margin-top:30px;color:#9ec7ff}
+@media(max-width:900px){
+.wrap{grid-template-columns:1fr}
+h1{font-size:48px}
+.logo{width:140px}
 }
-
-body{
-
-background:
-radial-gradient(circle at top,#0d1b3b,#060816 55%,#03050c);
-
-color:white;
-overflow:hidden;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-
-}
-
-body:before{
-
-content:"";
-position:absolute;
-width:200%;
-height:200%;
-background-image:
-radial-gradient(#1da1ff 1px,transparent 1px);
-
-background-size:60px 60px;
-
-opacity:.12;
-
-animation:move 50s linear infinite;
-
-}
-
-@keyframes move{
-
-from{transform:translateY(0);}
-to{transform:translateY(-500px);}
-
-}
-
-.card{
-
-position:relative;
-z-index:5;
-
-width:90%;
-max-width:900px;
-
-padding:70px;
-
-text-align:center;
-
-border-radius:24px;
-
-background:rgba(255,255,255,.04);
-
-backdrop-filter:blur(18px);
-
-border:1px solid rgba(255,255,255,.08);
-
-box-shadow:0 0 80px rgba(0,170,255,.15);
-
-}
-
-.logo{
-
-font-size:65px;
-
-margin-bottom:15px;
-
-}
-
-h1{
-
-font-size:58px;
-
-font-weight:800;
-
-letter-spacing:2px;
-
-margin-bottom:15px;
-
-}
-
-.blue{
-
-color:#38bdf8;
-
-}
-
-.tagline{
-
-font-size:22px;
-
-opacity:.92;
-
-margin-bottom:40px;
-
-line-height:1.6;
-
-}
-
-.badge{
-
-display:inline-block;
-
-padding:12px 24px;
-
-border-radius:50px;
-
-background:#0ea5e9;
-
-font-weight:700;
-
-margin-bottom:35px;
-
-}
-
-.features{
-
-display:flex;
-
-justify-content:center;
-
-flex-wrap:wrap;
-
-gap:15px;
-
-margin-bottom:45px;
-
-}
-
-.feature{
-
-padding:12px 22px;
-
-background:rgba(255,255,255,.05);
-
-border:1px solid rgba(255,255,255,.08);
-
-border-radius:40px;
-
-font-size:15px;
-
-}
-
-.coming{
-
-font-size:42px;
-
-font-weight:800;
-
-margin-bottom:15px;
-
-}
-
-.subtitle{
-
-font-size:18px;
-
-opacity:.75;
-
-line-height:1.7;
-
-max-width:650px;
-
-margin:auto;
-
-}
-
-.footer{
-
-margin-top:50px;
-
-font-size:14px;
-
-opacity:.55;
-
-letter-spacing:1px;
-
-}
-
-.cursor{
-
-display:inline-block;
-
-width:12px;
-
-height:28px;
-
-background:#38bdf8;
-
-margin-left:4px;
-
-animation:blink .8s infinite;
-
-}
-
-@keyframes blink{
-
-50%{opacity:0;}
-
-}
-
-@media(max-width:700px){
-
-.card{
-
-padding:40px 25px;
-
-}
-
-h1{
-
-font-size:42px;
-
-}
-
-.tagline{
-
-font-size:18px;
-
-}
-
-.coming{
-
-font-size:30px;
-
-}
-
-.logo{
-
-font-size:50px;
-
-}
-
-}
-
 </style>
-
 </head>
-
 <body>
-
-<div class="card">
-
-<div class="logo">🤖☸️</div>
-
-<h1>Kira<span class="blue">Ops</span></h1>
-
-<div class="tagline">
-
-AI-Powered Kubernetes SRE Agent
-
-<br>
-
-Automating Cloud Operations • Incident Response • DevOps Intelligence
-
+<div class="grid"></div>
+<section class="hero">
+<div class="wrap">
+<div>
+<img src="logo.png" class="logo" alt="KiraOps Logo">
+<h1>Kira<span>Ops</span></h1>
+<p class="lead">The AI SRE Engineer for Kubernetes</p>
+<p>Building an intelligent platform for Kubernetes troubleshooting, observability, incident response, root cause analysis and cloud automation.</p>
+<div class="buttons">
+<a class="btn primary" href="#">🚀 Coming Soon</a>
+<a class="btn secondary" href="https://github.com/">GitHub</a>
 </div>
-
-<div class="badge">
-
-🚀 COMING SOON
-
-</div>
-
 <div class="features">
-
-<div class="feature">Kubernetes</div>
-
-<div class="feature">AI Incident Analysis</div>
-
-<div class="feature">Root Cause Detection</div>
-
-<div class="feature">EKS / AKS / GKE</div>
-
-<div class="feature">Observability</div>
-
-<div class="feature">Cloud Automation</div>
-
-<div class="feature">SRE Assistant</div>
-
+<div class="card">☸️ Kubernetes Intelligence</div>
+<div class="card">🤖 AI Root Cause Detection</div>
+<div class="card">📊 Observability</div>
+<div class="card">⚡ Automated Remediation</div>
+<div class="card">☁️ Multi-Cloud Ready</div>
+<div class="card">🔐 Enterprise Security</div>
+</div>
+<p class="small"><strong>Stay Tuned.</strong> KiraOps is under active development.</p>
 </div>
 
-<div class="coming">
+<div class="panel">
+<h2 style="margin-bottom:20px">AI Console</h2>
+<div class="term">
+$ kira diagnose production
 
-Stay Tuned<span class="cursor"></span>
+✔ Reading Prometheus metrics...
+✔ Checking Kubernetes Events...
+✔ Inspecting Pods...
+✔ Root Cause Found
 
+CrashLoopBackOff
+deployment/api
+
+Suggested Fix
+
+kubectl rollout restart deployment api
 </div>
 
-<div class="subtitle">
+<h2 style="margin:30px 0 15px">Cluster Overview</h2>
 
-KiraOps is an intelligent Kubernetes SRE platform designed to help engineers diagnose incidents, automate troubleshooting, monitor clusters, and simplify cloud-native operations using AI.
-
-</div>
-
-<div class="footer">
-
-© 2026 KiraOps • Built with ❤️ for DevOps & SRE Engineers
+<div class="metric"><span>CPU Usage</span><strong>42%</strong></div>
+<div class="metric"><span>Memory</span><strong>61%</strong></div>
+<div class="metric"><span>Healthy Pods</span><strong>128 / 128</strong></div>
+<div class="metric"><span>AI Status</span><strong style="color:#57ff9c">ACTIVE</strong></div>
+<div class="metric"><span>Platform</span><strong>EKS / AKS / GKE</strong></div>
 
 </div>
-
 </div>
+</section>
 
+<footer class="footer">
+<h3>Created by Abhijeet Dhengale</h3>
+<p>CloudOps Engineer • Kubernetes • DevOps • AI</p>
+<p>© 2026 KiraOps. All Rights Reserved.</p>
+</footer>
 </body>
-
 </html>
