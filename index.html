@@ -1,110 +1,1196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KiraOps | AI SRE Agent for Kubernetes</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Inter,sans-serif;background:#07101f;color:#fff;overflow-x:hidden}
-body:before,body:after{content:"";position:fixed;inset:-20%;filter:blur(90px);z-index:-2}
-body:before{background:radial-gradient(circle,#00c6ff55,transparent 50%);animation:f1 12s infinite alternate}
-body:after{background:radial-gradient(circle,#6a5cff55,transparent 45%);animation:f2 15s infinite alternate}
-@keyframes f1{to{transform:translate(20%,15%)}}
-@keyframes f2{to{transform:translate(-15%,20%)}}
-.grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(circle,black 40%,transparent 95%);z-index:-1}
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px}
-.wrap{max-width:1200px;width:100%;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
-.logo{width:180px;margin-bottom:20px;filter:drop-shadow(0 0 25px #3cbcff)}
-h1{font-size:72px;font-weight:800}
-h1 span{background:linear-gradient(90deg,#00c6ff,#7a5cff);-webkit-background-clip:text;color:transparent}
-p.lead{font-size:24px;color:#b9d3ff;margin:20px 0}
-.badge{display:inline-block;padding:12px 22px;border:1px solid #2ca8ff;border-radius:999px;background:#0c223d}
-.buttons{margin:30px 0;display:flex;gap:15px;flex-wrap:wrap}
-.btn{padding:14px 24px;border-radius:10px;text-decoration:none;font-weight:700}
-.primary{background:linear-gradient(90deg,#00c6ff,#5b7cff);color:white}
-.secondary{border:1px solid #2ca8ff;color:#bde6ff}
-.features{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:25px}
-.card{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);padding:18px;border:1px solid rgba(255,255,255,.08);border-radius:16px}
-.panel{background:#091426;border:1px solid #223a5d;border-radius:18px;padding:25px;box-shadow:0 0 40px rgba(0,180,255,.15)}
-.term{font-family:"JetBrains Mono",monospace;color:#6ef5b6;white-space:pre-line;font-size:15px}
-.metric{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #20324d}
-.footer{text-align:center;padding:30px;color:#8ca4c7}
-.small{margin-top:30px;color:#9ec7ff}
-@media(max-width:900px){
-.wrap{grid-template-columns:1fr}
-h1{font-size:48px}
-.logo{width:140px}
-}
-</style>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>KiraOps | AI-native Kubernetes Operations</title>
+
+    <meta name="description"
+          content="KiraOps transforms Kubernetes telemetry into operational intelligence using AI.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- GSAP -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+
+    <script defer src="script.js"></script>
+
 </head>
+
 <body>
-<div class="grid"></div>
+
+<!-- Cursor -->
+<div class="cursor-glow"></div>
+<div class="cursor-arrow" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 3 L27 15.5 L17.2 18.2 L13.4 28.5 Z"
+              fill="#4f8cff" stroke="#0a1b46" stroke-width="2.4" stroke-linejoin="round"/>
+        <line x1="10" y1="8.5" x2="20" y2="14.2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+</div>
+
+<!-- Aurora -->
+
+<div class="aurora">
+
+    <span></span>
+    <span></span>
+    <span></span>
+
+</div>
+
+<!-- Floating Particles -->
+
+<div class="particles">
+
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+
+</div>
+
+<!-- Navbar -->
+
+<header class="navbar">
+
+    <div class="container">
+
+        <a href="#" class="logo">
+
+            <div class="logo-ring"></div>
+
+            <span>KiraOps</span>
+
+        </a>
+
+        <div class="nav-badge">
+
+            <span class="live-dot"></span>
+
+            <span class="badge-lead">🚀 Under Active Development</span>
+
+            <span class="badge-sep">•</span>
+
+            <span class="badge-accent">Launching Soon</span>
+
+            <span class="badge-sep">•</span>
+
+            <span class="badge-soft">No Licenses. No Paywalls. No Limits. Just Open Source.</span>
+
+        </div>
+
+        <a href="#" class="nav-btn" data-demo-open>
+
+            Launch Demo
+
+        </a>
+
+    </div>
+
+</header>
+
+<!-- Hero -->
+
 <section class="hero">
-<div class="wrap">
-<div>
-<img src="logo.png" class="logo" alt="KiraOps Logo">
-<h1>Kira<span>Ops</span></h1>
-<p class="lead">The AI SRE Engineer for Kubernetes</p>
-<p>Building an intelligent platform for Kubernetes troubleshooting, observability, incident response, root cause analysis and cloud automation.</p>
-<div class="buttons">
-<a class="btn primary" href="#">🚀 Coming Soon</a>
-<a class="btn secondary"
-   href="https://github.com/AbhijeetTD/kira"
-   target="_blank"
-   rel="noopener noreferrer">
-   <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;margin-right:8px;">
-      <path d="M8 0C3.58 0 0 3.58 0 8a8.01 8.01 0 005.47 7.59c.4.07.55-.17.55-.38v-1.49c-2.23.48-2.7-.94-2.7-.94-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.81.06 1.24.83 1.24.83.72 1.23 1.89.88 2.35.67.07-.52.28-.88.5-1.08-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.58.82-2.13-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.81a7.6 7.6 0 014 0c1.53-1.02 2.2-.81 2.2-.81.44 1.1.16 1.92.08 2.12.51.55.82 1.26.82 2.13 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.14.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/>
-   </svg>
-   View on GitHub
-</a>
-</div>
-<div class="features">
-<div class="card">☸️ Kubernetes Intelligence</div>
-<div class="card">🤖 AI Root Cause Detection</div>
-<div class="card">📊 Observability</div>
-<div class="card">⚡ Automated Remediation</div>
-<div class="card">☁️ Multi-Cloud Ready</div>
-<div class="card">🔐 Enterprise Security</div>
-</div>
-<p class="small"><strong>Stay Tuned.</strong> KiraOps is under active development.</p>
-</div>
 
-<div class="panel">
-<h2 style="margin-bottom:20px">AI Console</h2>
-<div class="term">
-$ kira diagnose production
+    <div class="container hero-grid">
 
-✔ Reading Prometheus metrics...
-✔ Checking Kubernetes Events...
-✔ Inspecting Pods...
-✔ Root Cause Found
+        <!-- Left -->
 
-CrashLoopBackOff
-deployment/api
+        <div class="hero-content">
 
-Suggested Fix
+            <div class="eyebrow">
 
-kubectl rollout restart deployment api
-</div>
+                AI-NATIVE KUBERNETES OPERATIONS
 
-<h2 style="margin:30px 0 15px">Cluster Overview</h2>
+            </div>
 
-<div class="metric"><span>CPU Usage</span><strong>42%</strong></div>
-<div class="metric"><span>Memory</span><strong>61%</strong></div>
-<div class="metric"><span>Healthy Pods</span><strong>128 / 128</strong></div>
-<div class="metric"><span>AI Status</span><strong style="color:#57ff9c">ACTIVE</strong></div>
-<div class="metric"><span>Platform</span><strong>EKS / AKS / GKE</strong></div>
+            <h1>
 
-</div>
-</div>
+                Detect.
+
+                <br>
+
+                <span class="text-gradient">Understand.</span>
+
+                <br>
+
+                Resolve.
+
+                <br>
+
+                <span class="text-gradient">Automate.</span>
+
+            </h1>
+
+            <p>
+
+                KiraOps transforms Kubernetes metrics, logs,
+                events and traces into operational intelligence.
+
+                Resolve incidents faster with AI-powered
+                root cause analysis and automation.
+
+            </p>
+
+            <div class="hero-stats">
+
+                <div>
+
+                    <strong>AI Native</strong>
+
+                    <span>Operations</span>
+
+                </div>
+
+                <div>
+
+                    <strong>Multi Cluster</strong>
+
+                    <span>Observability</span>
+
+                </div>
+
+                <div>
+
+                    <strong>Automation</strong>
+
+                    <span>Built-in</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Right -->
+
+        <div class="hero-visual">
+
+            <div class="core">
+
+                <div class="ring ring-1"></div>
+                <div class="ring ring-2"></div>
+                <div class="ring ring-3"></div>
+
+                <div class="core-center">
+
+                    <span>KIRA</span>
+
+                    <small>AI Engine</small>
+
+                </div>
+
+                <div class="node metrics">
+
+                    Metrics
+
+                </div>
+
+                <div class="node logs">
+
+                    Logs
+
+                </div>
+
+                <div class="node events">
+
+                    Events
+
+                </div>
+
+                <div class="node traces">
+
+                    Traces
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="scroll-indicator">
+
+        <span></span>
+
+        Scroll to Explore
+
+    </div>
+
 </section>
 
+<!-- Story Placeholder -->
+
+<section class="experience" id="experience">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <span class="section-tag">
+                LIVE INCIDENT EXPERIENCE
+            </span>
+
+            <h2>
+                From <span class="text-gradient">Alert</span>
+                to <span class="text-gradient">Resolution</span>
+                in Seconds.
+            </h2>
+
+            <p>
+                Traditional monitoring tools show isolated telemetry.
+                KiraOps understands the complete incident by correlating
+                metrics, logs, events and traces before recommending and
+                executing remediation.
+            </p>
+
+        </div>
+
+        <div class="incident-flow">
+
+            <!-- CONNECTOR BEAMS -->
+            <svg class="flow-connectors" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <path class="flow-line flow-in"  d="M29,17 L39,50" />
+                <path class="flow-line flow-in"  d="M29,50 L39,50" />
+                <path class="flow-line flow-in"  d="M29,83 L39,50" />
+                <path class="flow-line flow-out" d="M61,50 L71,17" />
+                <path class="flow-line flow-out" d="M61,50 L71,50" />
+                <path class="flow-line flow-out" d="M61,50 L71,83" />
+            </svg>
+
+            <!-- LEFT SIDE -->
+
+            <div class="telemetry-column">
+
+                <div class="telemetry-card metrics-card">
+
+                    <div class="card-header">
+
+                        <span class="status-dot green"></span>
+
+                        Metrics
+
+                    </div>
+
+                    <div class="metric">
+
+                        <span>CPU</span>
+
+                        <div class="bar">
+                            <div class="fill cpu-fill"></div>
+                        </div>
+
+                        <strong>94%</strong>
+
+                    </div>
+
+                    <div class="metric">
+
+                        <span>Memory</span>
+
+                        <div class="bar">
+                            <div class="fill mem-fill"></div>
+                        </div>
+
+                        <strong>91%</strong>
+
+                    </div>
+
+                    <div class="metric">
+
+                        <span>Latency</span>
+
+                        <div class="bar">
+                            <div class="fill latency-fill"></div>
+                        </div>
+
+                        <strong>1240ms</strong>
+
+                    </div>
+
+                </div>
+
+                <div class="telemetry-card logs-card">
+
+                    <div class="card-header">
+
+                        <span class="status-dot red"></span>
+
+                        Live Logs
+
+                    </div>
+
+<pre class="terminal">
+
+ERROR Payment API timeout
+ERROR Redis connection lost
+WARN Retry attempt #5
+ERROR OOMKilled pod/api-4
+INFO Scaling deployment...
+</pre>
+
+                </div>
+
+                <div class="telemetry-card events-card">
+
+                    <div class="card-header">
+
+                        <span class="status-dot yellow"></span>
+
+                        Kubernetes Events
+
+                    </div>
+
+                    <ul>
+
+                        <li>CrashLoopBackOff</li>
+
+                        <li>Pod Restarted × 8</li>
+
+                        <li>Readiness Failed</li>
+
+                        <li>Memory Pressure</li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <!-- CENTER -->
+
+<div class="ai-engine">
+
+    <div class="brain-ring ring-a"></div>
+    <div class="brain-ring ring-b"></div>
+
+    <div class="brain-core">
+
+    <h3>KIRA</h3>
+
+    <span>AI ENGINE</span>
+
+</div>
+
+    <div class="pulse pulse-1"></div>
+    <div class="pulse pulse-2"></div>
+
+<p class="kira-description">
+    Correlating metrics, logs, events and traces in real time.
+</p>
+
+</div>
+
+            <!-- RIGHT -->
+
+            <div class="analysis-column">
+
+                <div class="analysis-card">
+
+                    <span class="analysis-label">
+
+                        ROOT CAUSE
+
+                    </span>
+
+                    <h3>
+
+                        Memory Leak Detected
+
+                    </h3>
+
+                    <p>
+
+                        Root cause isolated to unbounded
+                        cache growth in payment-service:v2.4.1.
+
+                    </p>
+
+                    <div class="confidence">
+
+                        <span>Confidence</span>
+
+                        <strong>98.7%</strong>
+
+                    </div>
+
+                </div>
+
+                <div class="recommendation">
+
+                    <h4>
+
+                        AI Recommendation
+
+                    </h4>
+
+                    <ul>
+
+                        <li>Increase memory limit</li>
+
+                        <li>Restart unhealthy pods</li>
+
+                        <li>Flush cache</li>
+
+                        <li>Rollback deployment</li>
+
+                    </ul>
+
+                </div>
+
+                <div class="automation-terminal">
+
+<pre>
+> kubectl rollout undo deployment/payment
+✓ Pods restarted
+✓ Memory normalized
+✓ Latency recovered
+✓ Cluster Healthy
+</pre>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="dashboard-section" id="dashboard">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <span class="section-tag">
+                PLATFORM OVERVIEW
+            </span>
+
+            <h2>
+
+                Built for Modern
+                <span class="text-gradient">Platform Teams</span>
+
+            </h2>
+
+            <p>
+
+                Observe every cluster in real time.
+                Detect unhealthy workloads instantly.
+                Let AI surface the incidents that actually matter.
+
+            </p>
+
+        </div>
+
+        <div class="dashboard-grid">
+
+            <!-- Sidebar -->
+
+            <aside class="dashboard-sidebar">
+
+                <div class="sidebar-logo">
+
+                    KiraOps
+
+                </div>
+
+                <ul>
+
+                    <li class="active">Overview</li>
+                    <li>Clusters</li>
+                    <li>Incidents</li>
+                    <li>Deployments</li>
+                    <li>Automation</li>
+                    <li>AI Insights</li>
+
+                </ul>
+
+            </aside>
+
+            <!-- Dashboard -->
+
+            <div class="dashboard-main">
+
+                <div class="dashboard-top">
+
+                    <div class="mini-card">
+
+                        <small>Clusters</small>
+
+                        <strong>18</strong>
+
+                    </div>
+
+                    <div class="mini-card">
+
+                        <small>Healthy Pods</small>
+
+                        <strong>1248</strong>
+
+                    </div>
+
+                    <div class="mini-card">
+
+                        <small>Critical Alerts</small>
+
+                        <strong class="danger-count">03</strong>
+
+                    </div>
+
+                    <div class="mini-card">
+
+                        <small>AI Actions Today</small>
+
+                        <strong>74</strong>
+
+                    </div>
+
+                </div>
+
+                <div class="dashboard-panels">
+
+                    <div class="panel large">
+
+                        <div class="panel-header">
+
+                            Cluster Health
+
+                        </div>
+
+                        <div class="health-chart">
+
+                            <div class="chart-line"></div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            Top Incidents
+
+                        </div>
+
+                        <ul class="incident-list">
+
+                            <li>
+                                payment-prod
+                                <span>Critical</span>
+                            </li>
+
+                            <li>
+                                kafka-east
+                                <span>Warning</span>
+                            </li>
+
+                            <li>
+                                auth-service
+                                <span>Resolved</span>
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            KIRA Insights
+
+                        </div>
+
+                        <p>
+
+                            AI detected memory pressure on
+                            3 workloads and automatically
+                            restarted unhealthy pods.
+                            Estimated downtime prevented:
+                            <strong>17 minutes.</strong>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="architecture" id="architecture">
+
+    <div class="section-title">
+        <span>Platform Architecture</span>
+        <h2>How KIRA Thinks</h2>
+        <p>
+            From telemetry ingestion to automated remediation,
+            KIRA continuously understands your Kubernetes clusters.
+        </p>
+    </div>
+
+    <div class="architecture-wrapper">
+
+        <div class="arch-node arch-users">
+            👨‍💻
+            <span>Engineers</span>
+        </div>
+
+        <div class="arch-node arch-metrics">
+            📊
+            <span>Metrics</span>
+        </div>
+
+        <div class="arch-node arch-logs">
+            📜
+            <span>Logs</span>
+        </div>
+
+        <div class="arch-node arch-events">
+            ⚡
+            <span>Events</span>
+        </div>
+
+        <div class="arch-node arch-traces">
+            🔍
+            <span>Traces</span>
+        </div>
+
+        <div class="arch-center">
+
+            <div class="core-glow"></div>
+
+            <h3>KIRA</h3>
+
+            <small>AI SRE ENGINE</small>
+
+        </div>
+
+       <div class="arch-node arch-rca">
+            🧠
+            <span>Root Cause</span>
+        </div>
+
+        <div class="arch-node arch-automation">
+            🤖
+            <span>Automation</span>
+        </div>
+
+    </div>
+
+</section>
+<section class="features" id="features">
+
+    <div class="section-title">
+        <span>Capabilities</span>
+        <h2>What KIRA Can Do</h2>
+        <p>
+            From detecting anomalies to automating remediation,
+            KIRA acts like an experienced Kubernetes SRE working 24×7.
+        </p>
+    </div>
+
+    <div class="features-timeline">
+
+        <div class="feature-item">
+            <div class="feature-number">01</div>
+            <div class="feature-content">
+                <h3>Detect</h3>
+                <p>
+                    Continuously observes metrics, logs, events and traces across your Kubernetes clusters.
+                </p>
+            </div>
+        </div>
+
+        <div class="timeline-line"></div>
+
+        <div class="feature-item">
+            <div class="feature-number">02</div>
+            <div class="feature-content">
+                <h3>Correlate</h3>
+                <p>
+                    Connects telemetry signals to understand what actually caused the incident.
+                </p>
+            </div>
+        </div>
+
+        <div class="timeline-line"></div>
+
+        <div class="feature-item">
+            <div class="feature-number">03</div>
+            <div class="feature-content">
+                <h3>Diagnose</h3>
+                <p>
+                    Performs intelligent root cause analysis with confidence scoring.
+                </p>
+            </div>
+        </div>
+
+        <div class="timeline-line"></div>
+
+        <div class="feature-item">
+            <div class="feature-number">04</div>
+            <div class="feature-content">
+                <h3>Recommend</h3>
+                <p>
+                    Suggests safe remediation actions based on cluster context.
+                </p>
+            </div>
+        </div>
+
+        <div class="timeline-line"></div>
+
+        <div class="feature-item">
+            <div class="feature-number">05</div>
+            <div class="feature-content">
+                <h3>Automate</h3>
+                <p>
+                    Executes approved workflows such as restart, scale, rollback and recovery.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+<section class="comparison" id="comparison">
+
+    <div class="section-title">
+        <span>Why KIRA?</span>
+        <h2>Traditional Operations vs AI-Driven Operations</h2>
+        <p>
+            See how KIRA transforms incident response from reactive troubleshooting
+            into proactive intelligence.
+        </p>
+    </div>
+
+    <div class="comparison-grid">
+
+        <!-- Traditional -->
+
+        <div class="compare-card traditional">
+
+            <div class="compare-header">
+                <h3>Traditional Monitoring</h3>
+                <span>Manual Investigation</span>
+            </div>
+
+            <ul>
+
+                <li>🚨 Alert received</li>
+
+                <li>📊 Open Grafana dashboards</li>
+
+                <li>📜 Search application logs</li>
+
+                <li>🔍 Correlate metrics manually</li>
+
+                <li>👨‍💻 Engineer finds root cause</li>
+
+                <li>⏳ Recovery takes hours</li>
+
+            </ul>
+
+            <div class="compare-footer bad">
+
+                Mean Time to Recovery
+
+                <strong>2–6 Hours</strong>
+
+            </div>
+
+        </div>
+
+        <!-- KIRA -->
+
+        <div class="compare-card kira">
+
+            <div class="compare-header">
+                <h3>KIRA Operations</h3>
+                <span>AI SRE Engineer</span>
+            </div>
+
+            <ul>
+
+                <li>✅ Detects anomaly instantly</li>
+
+                <li>⚡ Correlates telemetry automatically</li>
+
+                <li>🧠 Identifies root cause</li>
+
+                <li>💡 Recommends remediation</li>
+
+                <li>🤖 Executes approved automation</li>
+
+                <li>🚀 Recovery in minutes</li>
+
+            </ul>
+
+            <div class="compare-footer good">
+
+                Mean Time to Recovery
+
+                <strong>&lt; 5 Minutes</strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="console-section" id="console">
+
+    <div class="section-title">
+        <span>Live Demo</span>
+        <h2>Watch KIRA Investigate an Incident</h2>
+        <p>
+            See how KIRA analyzes telemetry, identifies the root cause,
+            and recommends remediation in seconds.
+        </p>
+    </div>
+
+    <div class="terminal-window">
+
+        <div class="terminal-header">
+
+            <div class="terminal-buttons">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="terminal-title">
+                kira-terminal
+            </div>
+
+        </div>
+
+        <div class="terminal-body">
+
+<pre id="terminal-output">
+$ kira analyze payment-service
+
+Initializing analysis...
+
+</pre>
+
+            <button class="terminal-btn">
+                Execute Automation
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="cta-section" id="cta">
+
+    <div class="cta-glow"></div>
+
+    <div class="cta-content">
+
+        <span class="cta-badge">
+            Ready to modernize Kubernetes operations?
+        </span>
+
+        <h2>
+            Let <span>KIRA</span> Become Your Next SRE Engineer
+        </h2>
+
+        <p>
+            Detect incidents faster, identify root causes automatically,
+            and recover your Kubernetes workloads in minutes instead of hours.
+        </p>
+
+        <div class="cta-stats">
+
+            <div>
+                <strong>99.9%</strong>
+                <span>Platform Availability</span>
+            </div>
+
+            <div>
+                <strong>&lt;5 min</strong>
+                <span>Average Recovery</span>
+            </div>
+
+            <div>
+                <strong>24×7</strong>
+                <span>AI Monitoring</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
 <footer class="footer">
-<h3>Created by Abhijeet Dhengale</h3>
-<p>CloudOps Engineer • Kubernetes • DevOps • AI</p>
-<p>© 2026 KiraOps. All Rights Reserved.</p>
+
+    <div class="footer-grid">
+
+        <div class="footer-brand">
+
+            <h2>KiraOps</h2>
+
+            <p>
+                AI-native Kubernetes Operations powered by KIRA.
+                Detect, diagnose and automate incident response with confidence.
+            </p>
+
+        </div>
+
+        <div class="footer-contact">
+
+            <h4>Get in Touch</h4>
+
+            <a href="https://www.linkedin.com/in/abhijeet-dhengale-56630160/" target="_blank" rel="noopener noreferrer">
+                <span>in</span> LinkedIn Profile
+            </a>
+
+            <a href="tel:+919922168233">
+                <span>☎</span> +91 99221 68233
+            </a>
+
+            <a href="mailto:abhijeetdhengle8856@gmail.com">
+                <span>✉</span> abhijeetdhengle8856@gmail.com
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+
+        <span>© 2026 KiraOps. All rights reserved.</span>
+
+        <span>
+            Built with ❤️ for Kubernetes Engineers.
+        </span>
+
+    </div>
+
 </footer>
+
+<!-- Live Demo Modal -->
+<div class="demo-modal" id="demoModal" aria-hidden="true">
+
+    <div class="demo-backdrop" data-demo-close></div>
+
+    <div class="demo-window" role="dialog" aria-modal="true" aria-label="KiraOps Live Demo">
+
+        <div class="demo-titlebar">
+
+            <div class="demo-dots"><span></span><span></span><span></span></div>
+
+            <div class="demo-url">app.kiraops.in / incidents</div>
+
+            <button class="demo-close" data-demo-close aria-label="Close demo">&times;</button>
+
+        </div>
+
+        <div class="demo-body">
+
+            <aside class="demo-sidebar">
+
+                <div class="demo-logo"><span class="demo-logo-ring"></span> KiraOps</div>
+
+                <nav class="demo-nav">
+                    <a class="active" data-nav="0">🚨 Incidents</a>
+                    <a data-nav="1">📊 Clusters</a>
+                    <a data-nav="2">🧠 RCA Reports</a>
+                    <a data-nav="3">🤖 Automation</a>
+                    <a data-nav="4">🔌 Integrations</a>
+                </nav>
+
+                <div class="demo-clusters">
+                    <span class="demo-clbl">Connected Clusters</span>
+                    <div class="demo-chips">
+                        <span class="demo-chip">EKS</span>
+                        <span class="demo-chip">AKS</span>
+                        <span class="demo-chip">GKE</span>
+                        <span class="demo-chip">IKS</span>
+                        <span class="demo-chip">Local</span>
+                    </div>
+                </div>
+
+                <div class="demo-integrations">
+                    <span class="demo-clbl">Integrations</span>
+                    <div class="demo-chips">
+                        <span class="demo-chip int">Jira</span>
+                        <span class="demo-chip int">Teams</span>
+                        <span class="demo-chip int">Google Chat</span>
+                        <span class="demo-chip int">Grafana</span>
+                        <span class="demo-chip int">Prometheus</span>
+                    </div>
+                </div>
+
+            </aside>
+
+            <main class="demo-stage">
+
+                <div class="demo-tracker">
+                    <div class="demo-track-item" data-step="0"><span>1</span> Detect</div>
+                    <div class="demo-track-item" data-step="1"><span>2</span> Incident</div>
+                    <div class="demo-track-item" data-step="2"><span>3</span> RCA</div>
+                    <div class="demo-track-item" data-step="3"><span>4</span> Decision</div>
+                    <div class="demo-track-item" data-step="4"><span>5</span> Resolved</div>
+                </div>
+
+                <div class="demo-screens">
+
+                    <!-- STEP 1: Detection -->
+                    <section class="demo-screen" data-screen="0">
+                        <div class="demo-panel">
+                            <div class="demo-panel-head">
+                                <span class="demo-src">📡 Grafana · Prometheus</span>
+                                <span class="demo-badge fire">● Firing</span>
+                            </div>
+                            <h3>Pod anomaly detected</h3>
+                            <p class="demo-meta">cluster <b>prod-eks-01</b> · namespace <b>payments</b></p>
+                            <div class="demo-graph">
+                                <svg viewBox="0 0 300 90" preserveAspectRatio="none">
+                                    <polyline class="demo-graph-line" points="0,70 40,66 80,60 120,55 160,42 200,30 240,14 300,4"/>
+                                </svg>
+                                <span class="demo-graph-label">Memory usage · payment-service-7f9c</span>
+                            </div>
+                            <div class="demo-alert-row">
+                                <span class="demo-dot red"></span>
+                                <span><b>OOMKilled</b> — pod/payment-service-7f9c exceeded memory limit (512Mi)</span>
+                            </div>
+                            <div class="demo-forward">→ Forwarding signal to KiraOps…</div>
+                        </div>
+                    </section>
+
+                    <!-- STEP 2: Incident -->
+                    <section class="demo-screen" data-screen="1">
+                        <div class="demo-panel">
+                            <div class="demo-panel-head">
+                                <span class="demo-src">🚨 Incident auto-created</span>
+                                <span class="demo-badge crit">Critical</span>
+                            </div>
+                            <h3>INC-2043 · payment-service crash loop</h3>
+                            <p class="demo-meta">source <b>Prometheus</b> · cluster <b>prod-eks-01</b> · owner <b>KIRA</b></p>
+                            <div class="demo-timeline">
+                                <div class="demo-tl"><span class="demo-dot green"></span> Detected via Prometheus alert</div>
+                                <div class="demo-tl"><span class="demo-dot blue"></span> Incident opened in KiraOps</div>
+                                <div class="demo-tl"><span class="demo-dot amber"></span> Triage started by AI engine</div>
+                            </div>
+                            <div class="demo-fanout">
+                                <span class="demo-clbl">Notifying your stack</span>
+                                <div class="demo-chips">
+                                    <span class="demo-chip int">Jira · INC-2043 ↗</span>
+                                    <span class="demo-chip int">Teams alerted</span>
+                                    <span class="demo-chip int">Google Chat ping</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- STEP 3: RCA -->
+                    <section class="demo-screen" data-screen="2">
+                        <div class="demo-panel">
+                            <div class="demo-panel-head">
+                                <span class="demo-src">🧠 KIRA · Root Cause Analysis</span>
+                                <span class="demo-badge ai">Analyzing</span>
+                            </div>
+                            <h3>Correlating signals</h3>
+                            <div class="demo-check-list">
+                                <div class="demo-check"><span></span> Prometheus metrics</div>
+                                <div class="demo-check"><span></span> Loki logs</div>
+                                <div class="demo-check"><span></span> Kubernetes events</div>
+                                <div class="demo-check"><span></span> OpenTelemetry traces</div>
+                            </div>
+                            <div class="demo-rca">
+                                <span class="demo-clbl">Root cause</span>
+                                <p>Unbounded cache growth in <b>payment-service:v2.4.1</b> causing a memory leak → OOMKilled under load.</p>
+                                <div class="demo-confidence">
+                                    <span>Confidence</span>
+                                    <strong class="demo-conf-value">0%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- STEP 4: Decision -->
+                    <section class="demo-screen" data-screen="3">
+                        <div class="demo-panel">
+                            <div class="demo-panel-head">
+                                <span class="demo-src">🤖 Remediation</span>
+                                <span class="demo-badge ok">98.7% confidence</span>
+                            </div>
+                            <h3>Recommended fix ready</h3>
+                            <div class="demo-fix">
+                                <code>kubectl set resources deploy/payment-service --limits=memory=768Mi &amp;&amp; kubectl rollout restart deploy/payment-service</code>
+                            </div>
+                            <p class="demo-meta">Confidence exceeds the <b>98%</b> auto-remediation threshold. Choose how to proceed:</p>
+                            <div class="demo-actions">
+                                <button class="demo-act primary" data-action="apply">⚡ Auto-Apply Fix</button>
+                                <button class="demo-act" data-action="approve">✅ Request Approval</button>
+                                <button class="demo-act" data-action="manual">🔧 Manual Fix</button>
+                            </div>
+                            <div class="demo-action-note" data-note></div>
+                        </div>
+                    </section>
+
+                    <!-- STEP 5: Resolved -->
+                    <section class="demo-screen" data-screen="4">
+                        <div class="demo-panel">
+                            <div class="demo-panel-head">
+                                <span class="demo-src">✅ Resolved</span>
+                                <span class="demo-badge ok">Healthy</span>
+                            </div>
+                            <h3>Incident resolved by KIRA</h3>
+                            <div class="demo-apply-log">
+                                <div class="demo-tl"><span class="demo-dot green"></span> Memory limit raised to 768Mi</div>
+                                <div class="demo-tl"><span class="demo-dot green"></span> Rollout restarted · new replica healthy</div>
+                                <div class="demo-tl"><span class="demo-dot green"></span> Probes passing · traffic stabilized</div>
+                            </div>
+                            <div class="demo-mttr">
+                                <div><span class="demo-clbl">MTTR</span><strong>42s</strong></div>
+                                <div><span class="demo-clbl">RCA report</span><strong>Archived</strong></div>
+                                <div><span class="demo-clbl">Jira INC-2043</span><strong>Closed</strong></div>
+                            </div>
+                            <div class="demo-forward ok">Teams &amp; Google Chat notified · incident closed automatically ✓</div>
+                        </div>
+                    </section>
+
+                </div>
+
+                <div class="demo-controls">
+                    <div class="demo-progress"><div class="demo-progress-bar"></div></div>
+                    <button class="demo-replay" data-demo-replay>↻ Replay demo</button>
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>
+
+</div>
+
 </body>
 </html>
